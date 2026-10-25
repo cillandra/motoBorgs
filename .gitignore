@@ -6,6 +6,7 @@
 /public/build/
 /.superpowers/
 /.phpunit.cache/
+/.phpunit.result.cache
 /storage/*.key
 /storage/logs/*
 !/storage/logs/.gitignore
