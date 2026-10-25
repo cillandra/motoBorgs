@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@fontsource/barlow':
+        specifier: ^5.3.0
+        version: 5.3.0
     devDependencies:
       laravel-vite-plugin:
         specifier: ^3.1
@@ -24,6 +28,9 @@ packages:
   '@alcalzone/ansi-tokenize@0.3.1':
     resolution: {integrity: sha512-cUD0PT0YX+rImRhfn7BfMRduP/tX/Zqt/N0dHlAyn2RlcJssCb5KsCJkhln61eh9vuJDkH8wKn3L8zJzzWXPFg==}
     engines: {node: '>=18'}
+
+  '@fontsource/barlow@5.3.0':
+    resolution: {integrity: sha512-tGR0y6QObRtKv71MOth44222+mdNFM/ZWFWDV1VLzNbG4oK9PNRlyJzmkck4vHAi9ibHBXgt4SlY51amFP55CA==}
 
   '@laravel/multiplex@0.4.5':
     resolution: {integrity: sha512-NhDhj4b1/+6j1xYnonzx3vZa39CAUUM7iCAN0xZ5jjcYw3GKORtiXXb0XwXW74wyeVJ25vAvXzfIhy4MXmmzCw==}
@@ -498,6 +505,8 @@ snapshots:
       ansi-styles: 6.2.3
       is-fullwidth-code-point: 5.1.0
     optional: true
+
+  '@fontsource/barlow@5.3.0': {}
 
   '@laravel/multiplex@0.4.5':
     dependencies:
