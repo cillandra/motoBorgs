@@ -1,0 +1,3 @@
+# Serve only the public/ directory through the dedicated MOTO startup script.
+# Block Apache access to project files if the parent htdocs URL is used.
+Require all denied
