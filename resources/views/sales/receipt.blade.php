@@ -1,0 +1,16 @@
+@extends('layouts.app')
+@section('title','Sale completed')
+@section('content')
+<section class="receipt-result" data-receipt data-user="{{ auth()->id() }}" data-request-key="{{ $sale->request_key }}"><header><h1>Sale completed</h1><p>Payment recorded · exact SKU stock updated</p></header>
+<article class="receipt-paper" style="--receipt-width:{{ $width }}mm">
+<h2>{{ $shop['shop_name']??'BORG’S Motorcycle Parts and Accessories' }}</h2>@if(!empty($shop['address']))<p>{{ $shop['address'] }}</p>@endif @if(!empty($shop['contact']))<p>{{ $shop['contact'] }}</p>@endif
+<strong class="receipt-copy">{{ $copy?'COPY':'ORIGINAL PREVIEW' }}</strong>
+<p>Sale MOTO-{{ str_pad($sale->id,8,'0',STR_PAD_LEFT) }}<br>{{ $sale->created_at->timezone('Asia/Manila')->format('d M Y, H:i') }}<br>Cashier: {{ $sale->cashier_name }}<br>Payment: {{ ['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'][$sale->payment->method] }}</p>
+<div class="receipt-lines">@foreach($sale->lines as $line)<div class="receipt-line"><div><strong>{{ $line->product_name }}</strong><p>{{ $line->sku }} · {{ $line->variant_name }}<br>{{ $line->quantity }} {{ $line->unit }} × ₱{{ \App\Support\Money::format($line->price_centavos) }}@if($line->discount_centavos)<br>Line discount: ₱{{ \App\Support\Money::format($line->discount_centavos) }}@endif</p></div><strong>₱{{ \App\Support\Money::format($line->total_centavos) }}</strong></div>@endforeach</div>
+<div class="receipt-totals"><div><span>Subtotal</span><strong>₱{{ \App\Support\Money::format($sale->subtotal_centavos) }}</strong></div><div><span>Discount</span><strong>₱{{ \App\Support\Money::format($sale->discount_centavos) }}</strong></div><div class="receipt-total"><strong>Total paid</strong><strong>₱{{ \App\Support\Money::format($sale->total_centavos) }}</strong></div><div><span>Amount received</span><strong>₱{{ \App\Support\Money::format($sale->payment->received_centavos) }}</strong></div><div><span>Change</span><strong>₱{{ \App\Support\Money::format($sale->payment->change_centavos) }}</strong></div>@if($sale->payment->reference)<p>Reference: {{ $sale->payment->reference }}</p>@endif</div>
+<footer><strong>Academic demonstration receipt</strong><p>Tax calculation unconfigured · Operational preview</p>@if(!empty($receiptSettings['footer']) && $receiptSettings['footer'] !== 'Academic demonstration receipt')<p>{{ $receiptSettings['footer'] }}</p>@endif</footer>
+</article>
+<div class="receipt-controls"><div class="action-row"><a class="button button-secondary" href="{{ route('sales.receipt',[$sale,'width'=>58,'copy'=>1]) }}">58 mm copy</a><a class="button button-secondary" href="{{ route('sales.receipt',[$sale,'width'=>80,'copy'=>1]) }}">80 mm copy</a><x-button variant="secondary" data-print-receipt>Print receipt</x-button></div><p data-print-message>Print after recording. If printing fails, use this same sale’s copy; no second sale is needed.</p><div class="action-row">@if(Route::has('sales.show'))<a class="button button-secondary" href="{{ route('sales.show',$sale) }}">Sale details</a>@endif<a class="button button-primary" href="{{ route('pos.index') }}">New sale</a></div></div>
+</section>
+<style>@media print{@page{size:{{ $width }}mm auto;margin:3mm}}</style>
+@endsection

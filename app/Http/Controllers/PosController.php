@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\Category;
+use App\Models\Sale;
 use App\Models\Variant;
 use App\Services\Catalog\CatalogQuery;
 use App\Services\Pos\CartService;
@@ -20,6 +21,9 @@ class PosController extends Controller
         $cart = ! empty($data['cart']) ? Cart::findOrFail($data['cart']) : Cart::where('cashier_id', $request->user()->id)->where('status', 'draft')->latest('id')->first();
         $cart ??= Cart::create(['cashier_id' => $request->user()->id])->refresh();
         $service->owned($request->user(), $cart);
+        if ($cart->status === 'completed') {
+            return redirect()->route('sales.receipt', Sale::where('cart_id', $cart->id)->firstOrFail());
+        }
         abort_unless($cart->status === 'draft', 409, 'Resume a held cart, or start a new sale.');
         $quote = $service->quote($request->user(), $cart);
         $filters = array_diff_key($data, ['cart' => true]);

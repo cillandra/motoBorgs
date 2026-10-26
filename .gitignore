@@ -15,3 +15,5 @@
 /storage/framework/views/*
 /.runtime/
 /demo-access.txt
+
+/.runtime/

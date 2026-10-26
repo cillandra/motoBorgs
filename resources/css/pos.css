@@ -4,3 +4,4 @@
 @media(min-width:901px){.pos-columns{grid-template-rows:minmax(0,1fr)}.pos-catalog{min-height:0}}
 .pos-products{grid-auto-rows:minmax(336px,auto)}
 .pos-availability{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:var(--muted)}
+.pos-page .modal>header>div>p{margin-top:4px}.pos-page .modal>header{align-items:flex-start;margin-bottom:16px}

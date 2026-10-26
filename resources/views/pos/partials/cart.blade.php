@@ -8,7 +8,7 @@
 </div>
 <div class="order-summary"><div><span>Subtotal</span><strong>₱{{ \App\Support\Money::format($quote['subtotal']) }}</strong></div><div><span>Discount</span><strong>₱{{ \App\Support\Money::format($quote['discount']) }}</strong></div><div class="order-total"><strong>Total due</strong><strong>₱{{ \App\Support\Money::format($quote['total']) }}</strong></div></div>
 @if($quote['lines'])<div class="pos-order-actions"><x-button variant="secondary" data-dialog-open="discount-approval">Discount</x-button><form action="{{ route('pos.hold',$cart) }}" method="post" data-pos-form>@csrf<input type="hidden" name="version" value="{{ $cart->version }}"><x-button variant="secondary" type="submit">Hold cart</x-button></form><x-button variant="secondary" class="button-remove" data-dialog-open="void-approval">Void</x-button></div>@endif
-<x-button class="pos-checkout" data-dialog-open="payment" :disabled="!Route::has('pos.checkout') || !$quote['lines'] || count($quote['warnings'])>0"><img src="{{ asset('assets/icons/pos-cart.svg') }}" alt="">Checkout · ₱{{ \App\Support\Money::format($quote['total']) }}</x-button>
+<x-button class="pos-checkout" data-dialog-open="payment" :disabled="!Route::has('checkout.store') || !$quote['lines'] || count($quote['warnings'])>0"><img src="{{ asset('assets/icons/pos-cart.svg') }}" alt="">Checkout · ₱{{ \App\Support\Money::format($quote['total']) }}</x-button>
 <p class="pos-policy">Discounts and voids are recorded in activity logs.<br>Stock updates after a confirmed sale.</p>
 @if($quote['lines'])<button type="button" class="button button-ghost" data-dialog-open="cancel-draft">Cancel draft</button>@endif
 </aside>

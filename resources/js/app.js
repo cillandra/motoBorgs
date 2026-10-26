@@ -3,3 +3,5 @@ import './dialogs.js';
 import './inventory.js';
 
 import './pos.js';
+
+import './checkout.js';

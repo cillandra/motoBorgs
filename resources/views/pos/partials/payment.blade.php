@@ -1,3 +1,1 @@
-@if(Route::has('pos.checkout'))
-<x-dialog id="payment" title="Payment">@include('pos.partials.payment-form')</x-dialog>
-@endif
+<x-dialog id="payment" title="Review payment" description="Review the cart total before recording payment.">@include('pos.partials.payment-form')</x-dialog>

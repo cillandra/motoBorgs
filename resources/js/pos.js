@@ -8,7 +8,7 @@ if (pos) {
         element.scrollIntoView({ block: 'nearest' });
     };
     async function write(url, payload, form) {
-        if (pending) return;
+        if (pending || pos.dataset.checkoutPending) return;
         pending = true;
         const controls = [...(form || pos).querySelectorAll('button')];
         controls.forEach((button) => { button.dataset.previousDisabled = String(button.disabled); button.disabled = true; });
@@ -45,7 +45,7 @@ if (pos) {
     }));
     pos.querySelector('[data-barcode-form]')?.addEventListener('submit', async (event) => {
         event.preventDefault();
-        if (pending) return;
+        if (pending || pos.dataset.checkoutPending) return;
         try {
             const code = event.target.querySelector('input').value.trim();
             const response = await fetch(pos.dataset.lookup + '?code=' + encodeURIComponent(code), { headers: { Accept: 'application/json' } });
