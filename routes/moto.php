@@ -5,6 +5,8 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\RefundController;
+use App\Http\Controllers\ReturnController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
@@ -19,4 +21,15 @@ Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): vo
     Route::post('/pos/carts/{cart}/resume', [CartController::class, 'resume'])->name('pos.resume');
     Route::post('/pos/carts/{cart}/cancel', [CartController::class, 'cancel'])->name('pos.cancel');
     Route::post('/pos/carts/{cart}/approval', [ApprovalController::class, 'store'])->middleware('throttle:10,15')->name('pos.approval');
+});
+
+Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
+    Route::get('/returns', [ReturnController::class, 'index'])->name('returns.index');
+    Route::get('/sales/{sale}/returns', [ReturnController::class, 'create'])->name('returns.create');
+    Route::post('/sales/{sale}/returns', [ReturnController::class, 'store'])->name('returns.store');
+    Route::get('/returns/{returnRequest}', [ReturnController::class, 'show'])->name('returns.show');
+    Route::middleware('manager')->group(function (): void {
+        Route::post('/returns/{returnRequest}/review', [ReturnController::class, 'review'])->name('returns.review');
+        Route::post('/returns/{returnRequest}/refund', [RefundController::class, 'store'])->name('refunds.store');
+    });
 });

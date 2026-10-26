@@ -22,3 +22,7 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('click', (event) => {
     document.querySelectorAll('details.profile-menu[open]').forEach((item) => { if (!item.contains(event.target)) item.removeAttribute('open'); });
 });
+
+document.addEventListener('cancel', (event) => {
+    if (event.target.matches('dialog') && (event.target.dataset.processing || event.target.closest('[data-workspace-modal]')?.dataset.processing)) event.preventDefault();
+}, true);

@@ -59,4 +59,17 @@ final class Money
 
         return $allocations;
     }
+
+    public static function refundForUnits(int $sold, int $price, int $discount, int $alreadyReturned, int $returning): int
+    {
+        if ($sold < 1 || $price < 0 || $price * $sold > self::MAX_CENTAVOS || $discount < 0 || $discount > $price * $sold
+            || $alreadyReturned < 0 || $returning < 1 || $alreadyReturned + $returning > $sold) {
+            throw new InvalidArgumentException('Invalid original sale or return quantity.');
+        }
+        $baseDiscount = intdiv($discount, $sold);
+        $extraDiscountUnits = $discount % $sold;
+        $extraInRange = min($alreadyReturned + $returning, $extraDiscountUnits) - min($alreadyReturned, $extraDiscountUnits);
+
+        return $returning * ($price - $baseDiscount) - $extraInRange;
+    }
 }

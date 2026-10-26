@@ -124,6 +124,9 @@ if (modal) {
         const previous = buttons.map((button) => button.disabled);
         buttons.forEach((button) => { button.disabled = true; });
         setBusy(true);
+        const fields = [...form.elements].filter((control) => control.tagName !== 'BUTTON');
+        const disabledFields = fields.map((control) => control.disabled);
+        fields.forEach((control) => { control.disabled = true; });
         content.querySelectorAll('[data-modal-validation]').forEach((node) => node.remove());
         try {
             const response = await fetch(form.getAttribute('action') || currentUrl, { method: form.getAttribute('method')?.toUpperCase() || 'POST',
@@ -164,6 +167,8 @@ if (modal) {
         } finally {
             setBusy(false);
             buttons.forEach((button, index) => { if (button.isConnected) button.disabled = previous[index]; });
+            fields.forEach((control, index) => { if (control.isConnected) control.disabled = disabledFields[index]; });
+            if (invalidField?.isConnected) invalidField.focus();
         }
     }
     document.addEventListener('click', (event) => {

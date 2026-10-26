@@ -16,7 +16,7 @@ class ReturnLine extends Model
 
     protected function casts(): array
     {
-        return [];
+        return ['quantity' => 'integer', 'restock_quantity' => 'integer', 'refundable_centavos' => 'integer'];
     }
 
     public function saleLine(): BelongsTo

@@ -1,0 +1,8 @@
+<x-dialog id="review-return-{{ $return->id }}" title="Review return request"><form action="{{ route('returns.review',$return) }}" method="post" class="stack" data-return-review-form>@csrf
+<p>Confirm as {{ auth()->user()->name }} · Manager. Inspect every item and record how many units can be sold again.</p>
+@foreach($return->lines as $line)<div class="return-item"><strong>{{ $line->saleLine->product_name }} · {{ $line->saleLine->sku }}</strong><p>Returned: {{ $line->quantity }} {{ $line->saleLine->unit }}</p><x-input id="restock-{{ $line->id }}" name="conditions[{{ $line->id }}][restock_quantity]" label="Sellable quantity" type="number" min="0" :max="$line->quantity" :value="$line->quantity" required step="1" /><p class="caption">Use zero for fully damaged stock. Other returned units are recorded as damaged and are not restocked.</p></div>@endforeach
+<div class="field"><label for="return-decision">Decision</label><div class="field-perimeter"><select id="return-decision" name="accept" required><option value="1">Approve return</option><option value="0">Reject request</option></select></div></div>
+<div class="field"><label for="review-reason">Inspection / decision reason *</label><div class="field-perimeter"><textarea id="review-reason" name="reason" required minlength="3" maxlength="1000"></textarea></div></div>
+<x-input id="review-password" name="password" type="password" label="Your current password" autocomplete="current-password" required maxlength="1024" />
+<div class="action-row"><x-button variant="secondary" data-dialog-close>Back</x-button><x-button type="submit">Confirm decision</x-button></div>
+</form></x-dialog>

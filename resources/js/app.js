@@ -7,3 +7,5 @@ import './pos.js';
 import './checkout.js';
 
 import './modals.js';
+
+import './returns.js';
