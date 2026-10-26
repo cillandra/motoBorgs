@@ -1,7 +1,7 @@
 # MOTO implementation specification
 
 Prepared: 25 October 2026, Asia/Singapore. Delivery target: 30 October 2026.
-Status: approved by the user on 25 October 2026; application implementation has not started.
+Status: approved by the user on 25 October 2026; native implementation is underway.
 
 ## 1. Intended result and confirmed decisions
 
@@ -139,3 +139,5 @@ No customer/public website, online orders, CRM, supplier/purchasing/delivery sub
 Assume demonstration shop contact details and product images may use clearly identified examples until real authorized assets are supplied. No physical printer/scanner, live payment integration, legal invoice compliance or production readiness claim is required for October 30. Hardware compatibility and real business configuration are later validation work.
 
 The deadline is a delivery target, not authorization to create a scheduled automation or claim background work continues after a chat turn ends.
+
+Execution update, 26 October: the user clarified that this release is a controlled soft deployment for evaluation; the approved feature scope remains unchanged and demonstration data is the current baseline.
