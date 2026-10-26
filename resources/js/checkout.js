@@ -1,5 +1,11 @@
-const form = document.querySelector('[data-checkout-form]');
-const receipt = document.querySelector('[data-receipt]');
+const checkoutInitialized = new WeakSet();
+function initializeCheckout(root = document) {
+let form = root.querySelector('[data-checkout-form]');
+if (form && checkoutInitialized.has(form)) form = null;
+if (form) checkoutInitialized.add(form);
+let receipt = root.querySelector('[data-receipt]');
+if (receipt && checkoutInitialized.has(receipt)) receipt = null;
+if (receipt) checkoutInitialized.add(receipt);
 if (receipt) {
     const storageKey = 'moto.checkout.' + receipt.dataset.user;
     try {
@@ -7,6 +13,8 @@ if (receipt) {
         if (attempt?.payload?.request_key === receipt.dataset.requestKey) sessionStorage.removeItem(storageKey);
     } catch {}
     receipt.querySelector('[data-print-receipt]')?.addEventListener('click', () => {
+        document.querySelectorAll('.receipt-print-target').forEach((paper) => paper.classList.remove('receipt-print-target'));
+        receipt.querySelector('.receipt-paper').classList.add('receipt-print-target');
         try { window.print(); }
         catch { receipt.querySelector('[data-print-message]').textContent = 'Printing could not open. This sale is saved. Reopen a copy to print again.'; }
     });
@@ -65,7 +73,7 @@ if (form) {
             const response = await fetch(form.dataset.statusUrl.replace('ATTEMPT', encodeURIComponent(attempt.payload.request_key)), { headers: { Accept: 'application/json' } });
             if (!response.ok) throw new Error('Status is unavailable. Keep this attempt and retry the status check.');
             const data = await response.json();
-            if (data.status === 'completed') { window.location.assign(data.receipt_url); return; }
+            if (data.status === 'completed') { dialog.close(); if (window.motoModal) await window.motoModal.openReceipt(data.receipt_url); else window.location.assign(data.receipt_url); return; }
             message('No completed sale was found for this attempt yet. Retry the same attempt; do not collect payment again.');
         } catch (error) { message(error.message); }
         finally { lock(false); }
@@ -100,7 +108,7 @@ if (form) {
                 throw new Error(data?.message || 'The checkout result is unconfirmed.');
             }
             if (!data?.receipt_url) throw new Error('The checkout result is unconfirmed.');
-            window.location.assign(data.receipt_url);
+            dialog.close(); if (window.motoModal) await window.motoModal.openReceipt(data.receipt_url); else window.location.assign(data.receipt_url);
         } catch (error) {
             if (!knownFailure) {
                 uncertain = true;
@@ -141,3 +149,15 @@ if (form) {
     }
     updatePayment();
 }
+
+}
+initializeCheckout();
+document.addEventListener('moto:content-ready', (event) => initializeCheckout(event.detail.root));
+
+
+window.addEventListener('beforeprint', () => {
+    const paper = document.querySelector('[data-workspace-modal][open] [data-receipt] .receipt-paper')
+        || document.querySelector('#main-content [data-receipt] .receipt-paper');
+    document.querySelectorAll('.receipt-print-target').forEach((element) => element.classList.remove('receipt-print-target'));
+    paper?.classList.add('receipt-print-target');
+});

@@ -1,4 +1,8 @@
-const pos = document.querySelector('[data-pos]');
+const initializedPos = new WeakSet();
+function initializePos(root = document) {
+const pos = root.querySelector('[data-pos]');
+if (pos && initializedPos.has(pos)) return;
+if (pos) initializedPos.add(pos);
 if (pos) {
     let pending = false;
     const showError = (message, form) => {
@@ -18,7 +22,10 @@ if (pos) {
             const response = await fetch(url, { method: 'POST', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }, body: JSON.stringify(payload) });
             const data = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(Object.values(data.errors || {}).flat()[0] || data.message || 'The request could not be completed. Reload and try again.');
-            window.location.assign(data.next || '/pos?cart=' + data.cart_id);
+            const next = new URL(data.next || window.location.href, window.location.href);
+            if (!data.next) next.searchParams.set('cart', data.cart_id);
+            if (window.motoModal) await window.motoModal.refresh(next.href, true);
+            else window.location.assign(next.href);
         } catch (error) {
             showError(error.message || 'Connection lost. Reload to check the saved cart.', form);
             pending = false;
@@ -59,3 +66,7 @@ if (pos) {
         dialog.addEventListener('close', () => dialog.querySelectorAll('[name="manager_password"]').forEach((input) => { input.value = ''; }));
     });
 }
+
+}
+initializePos();
+document.addEventListener('moto:content-ready', (event) => initializePos(event.detail.root));

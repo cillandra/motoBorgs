@@ -5,3 +5,5 @@ import './inventory.js';
 import './pos.js';
 
 import './checkout.js';
+
+import './modals.js';

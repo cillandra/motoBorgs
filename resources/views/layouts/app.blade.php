@@ -6,4 +6,5 @@
 <x-sidebar />
 <div class="main-workspace"><x-topbar :title="trim($__env->yieldContent('title','Dashboard'))" />
 <main id="main-content" class="page-content">@if(session('status'))<x-toast>{{ session('status') }}</x-toast>@endif @yield('content')</main></div>
+<x-workspace-modal />
 </body></html>

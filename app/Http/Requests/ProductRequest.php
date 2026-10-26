@@ -34,10 +34,16 @@ class ProductRequest extends FormRequest
         foreach (is_array($variants) ? $variants : [] as $index => $variant) {
             $id = is_array($variant) ? ($variant['id'] ?? null) : null;
             $owned = $id && $productId && Variant::where('id', $id)->where('product_id', $productId)->exists();
-            $rules['variants.'.$index.'.sku'][] = Rule::unique('variants', 'sku')->ignore($owned ? $id : null);
-            $rules['variants.'.$index.'.barcode'][] = Rule::unique('variants', 'barcode')->ignore($owned ? $id : null);
+            $rules['variants.'.$index.'.sku'] = [...$rules['variants.*.sku'], Rule::unique('variants', 'sku')->ignore($owned ? $id : null)];
+            $rules['variants.'.$index.'.barcode'] = [...$rules['variants.*.barcode'], Rule::unique('variants', 'barcode')->ignore($owned ? $id : null)];
         }
 
         return $rules;
+    }
+
+    public function attributes(): array
+    {
+        return ['variants.*.sku' => 'SKU', 'variants.*.barcode' => 'barcode', 'variants.*.name' => 'variant name',
+            'variants.*.unit_id' => 'selling unit', 'variants.*.price' => 'selling price', 'variants.*.threshold' => 'low-stock threshold'];
     }
 }

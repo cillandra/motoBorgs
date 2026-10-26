@@ -1,8 +1,18 @@
 document.addEventListener('click', (event) => {
     const close = event.target.closest('[data-dialog-close]');
-    if (close && !close.closest('dialog').dataset.processing) close.closest('dialog').close();
+    if (close) {
+        const dialog = close.closest('dialog');
+        if (!dialog.dataset.processing) {
+            if (dialog.matches('[data-workspace-modal]')) window.motoModal?.close();
+            else dialog.close();
+        }
+    }
     const opener = event.target.closest('[data-dialog-open]');
-    if (opener) document.getElementById(opener.dataset.dialogOpen)?.showModal();
+    if (opener) {
+        const scope = opener.closest('[data-workspace-content]') || document;
+        const target = scope.querySelector('#' + CSS.escape(opener.dataset.dialogOpen)) || document.getElementById(opener.dataset.dialogOpen);
+        target?.showModal();
+    }
     const dismiss = event.target.closest('[data-dismiss-toast]');
     if (dismiss) dismiss.closest('.toast').remove();
 });

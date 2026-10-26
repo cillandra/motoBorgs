@@ -141,3 +141,8 @@ Assume demonstration shop contact details and product images may use clearly ide
 The deadline is a delivery target, not authorization to create a scheduled automation or claim background work continues after a chat turn ends.
 
 Execution update, 26 October: the user clarified that this release is a controlled soft deployment for evaluation; the approved feature scope remains unchanged and demonstration data is the current baseline.
+
+## User clarification — 26 October 2026
+This is a school demonstration and project for now, superseding the earlier soft-deployment wording. Include all Figma pages and menus, with functioning features applicable to the current record-only payment setup and available hardware. Keep future hardware/provider integration boundaries visible without claiming they are connected.
+
+Use modals for contextual product details, create/edit forms, receives/count adjustments, receipt previews, return/refund actions, employee actions and confirmations where applicable. Main modules remain sidebar destinations. Keep authorization, persisted records, stock/money integrity and recovery requirements. Reuse authenticated routes as full-page fallbacks; normal interactions retain the current module, filters and list position. Save validation stays inside the modal, successful writes refresh the underlying data, and unsaved edits require a discard choice.
