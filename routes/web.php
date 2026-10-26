@@ -39,3 +39,5 @@ Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): vo
         Route::post('/products/{product}/restore', [ProductController::class, 'restore'])->name('products.restore');
     });
 });
+
+require __DIR__.'/moto.php';

@@ -1,0 +1,11 @@
+@foreach(['discount'=>'Discount approval','void'=>'Void unpaid cart'] as $kind=>$title)
+<x-dialog id="{{ $kind }}-approval" :title="$title"><form action="{{ route('pos.approval',$cart) }}" method="post" class="stack" data-pos-form>@csrf<input type="hidden" name="version" value="{{ $cart->version }}"><input type="hidden" name="action" value="{{ $kind==='discount'?'discount':'cancel_exception' }}">
+<p>{{ auth()->user()->name }} · CART-{{ $cart->id }} · Version {{ $cart->version }}</p><p>Manager authorization is required. The cashier stays signed in.</p>
+@if($kind==='discount')<x-input id="discount-amount" name="discount" label="Discount amount (PHP)" inputmode="decimal" required pattern="\d+(\.\d{1,2})?" /><p>Maximum 10%: ₱{{ \App\Support\Money::format(intdiv($quote['subtotal'],10)) }}. Approval expires after five minutes and is invalidated by cart changes.</p>@endif
+<div class="field"><label for="{{ $kind }}-reason">Reason *</label><div class="field-perimeter"><textarea id="{{ $kind }}-reason" name="reason" required minlength="3" maxlength="1000"></textarea></div></div>
+<x-input id="{{ $kind }}-manager" name="manager_username" label="Manager username" autocomplete="off" required maxlength="80" />
+<x-input id="{{ $kind }}-password" name="manager_password" label="Manager password" type="password" autocomplete="off" required maxlength="1024" />
+<div class="action-row"><x-button variant="secondary" data-dialog-close>Back</x-button><x-button type="submit" :variant="$kind==='void'?'danger':'primary'">{{ $kind==='void'?'Approve void':'Approve discount' }}</x-button></div><x-button variant="ghost" data-dialog-close>Reject request</x-button>
+</form></x-dialog>
+@endforeach
+<x-dialog id="cancel-draft" title="Cancel this draft?"><form action="{{ route('pos.cancel',$cart) }}" method="post" class="stack" data-pos-form>@csrf<input type="hidden" name="version" value="{{ $cart->version }}"><p>This closes the unpaid draft without changing stock.</p><x-input id="cancel-reason" name="reason" label="Reason" required minlength="3" maxlength="1000" /><div class="action-row"><x-button variant="secondary" data-dialog-close>Keep draft</x-button><x-button type="submit" variant="danger">Confirm cancellation</x-button></div></form></x-dialog>

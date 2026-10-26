@@ -1,6 +1,6 @@
 document.addEventListener('click', (event) => {
     const close = event.target.closest('[data-dialog-close]');
-    if (close) close.closest('dialog').close();
+    if (close && !close.closest('dialog').dataset.processing) close.closest('dialog').close();
     const opener = event.target.closest('[data-dialog-open]');
     if (opener) document.getElementById(opener.dataset.dialogOpen)?.showModal();
     const dismiss = event.target.closest('[data-dismiss-toast]');
