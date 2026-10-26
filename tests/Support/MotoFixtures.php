@@ -4,10 +4,10 @@ namespace Tests\Support;
 
 use App\Models\Cart;
 use App\Models\Product;
-use App\Models\StockMovement;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Variant;
+use App\Services\Inventory\StockLedger;
 
 trait MotoFixtures
 {
@@ -26,12 +26,12 @@ trait MotoFixtures
         $variant = Variant::factory()->create([
             'product_id' => Product::factory()->create()->id,
             'unit_id' => Unit::firstOrCreate(['code' => 'pc'], ['name' => 'Piece'])->id,
-            'stock' => $stock,
+            'stock' => 0,
             'price_centavos' => $price,
         ]);
-        StockMovement::create(['variant_id' => $variant->id, 'actor_id' => null, 'delta' => $stock, 'balance_after' => $stock, 'type' => 'opening', 'operation_key' => 'fixture:'.$variant->id, 'reason' => 'Approved fixture opening count']);
+        app(StockLedger::class)->post($variant, $stock, 'opening', 'fixture:'.$variant->id, null, 'Approved fixture opening count');
 
-        return $variant;
+        return $variant->refresh();
     }
 
     /** @param array<int, int> $variantQuantities */

@@ -43,3 +43,18 @@ if (form) {
     window.addEventListener('beforeunload', (event) => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
 }
 document.querySelector("[data-image-choose]")?.addEventListener("click", () => document.querySelector("[data-image-input]").click());
+const stockForm = document.querySelector('[data-stock-form]');
+if (stockForm) {
+    const quantity = stockForm.querySelector('#quantity');
+    const mode = stockForm.querySelector('#adjustment_mode');
+    const preview = () => {
+        if (quantity.value === '') { stockForm.querySelector('[data-stock-preview]').textContent = 'Enter a quantity to preview the resulting balance.'; return; }
+        const value = Number(quantity.value);
+        const balance = Number(stockForm.dataset.balance);
+        const result = !mode || mode.value === 'increase' ? balance + value : mode.value === 'decrease' ? balance - value : value;
+        stockForm.querySelector('[data-stock-preview]').textContent = Number.isInteger(value) && result >= 0 && result <= 1000000 ? 'New balance after saving: ' + result : 'Enter a valid whole quantity. Stock cannot be negative.';
+    };
+    quantity.addEventListener('input', preview);
+    mode?.addEventListener('change', preview);
+    preview();
+}

@@ -6,10 +6,10 @@ use App\Models\Category;
 use App\Models\Preference;
 use App\Models\Product;
 use App\Models\Setting;
-use App\Models\StockMovement;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Variant;
+use App\Services\Inventory\StockLedger;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -52,8 +52,8 @@ class DemoSeeder extends Seeder
             foreach ($rows as [$category, $name, $brand, $compatibility, $sku, $variantName, $unit, $price, $stock]) {
                 $categoryId = Category::firstOrCreate(['name' => $category])->id;
                 $product = Product::firstOrCreate(['name' => $name], ['category_id' => $categoryId, 'brand' => $brand, 'compatibility' => $compatibility, 'description' => 'Academic demonstration product. Verify actual fitment and shop data before real use.']);
-                $variant = Variant::create(['product_id' => $product->id, 'unit_id' => $units[$unit], 'sku' => $sku, 'name' => $variantName, 'price_centavos' => $price, 'stock' => $stock, 'threshold' => 3]);
-                StockMovement::create(['variant_id' => $variant->id, 'actor_id' => null, 'delta' => $stock, 'balance_after' => $stock, 'type' => 'opening', 'operation_key' => 'demo-opening:'.$sku, 'reason' => 'Approved academic opening count']);
+                $variant = Variant::create(['product_id' => $product->id, 'unit_id' => $units[$unit], 'sku' => $sku, 'name' => $variantName, 'price_centavos' => $price, 'stock' => 0, 'threshold' => 3]);
+                app(StockLedger::class)->post($variant, $stock, 'opening', 'demo-opening:'.$sku, null, 'Approved academic opening count');
             }
             $sections = [
                 'general' => ['shop_name' => 'BORG’S Motorcycle Parts and Accessories', 'address' => '', 'contact' => '', 'currency' => 'PHP', 'timezone' => 'Asia/Manila'],

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,8 @@ Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): vo
     Route::get('/inventory/{variant}', [InventoryController::class, 'show'])->name('inventory.show');
     Route::get('/products/{product}/image', [ProductController::class, 'image'])->name('products.image');
     Route::middleware('manager')->group(function (): void {
+        Route::get('/inventory/{variant}/stock', [StockController::class, 'form'])->name('stock.form');
+        Route::post('/inventory/{variant}/stock', [StockController::class, 'store'])->name('stock.store');
         Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');

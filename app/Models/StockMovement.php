@@ -12,11 +12,11 @@ class StockMovement extends Model
     /** @use HasFactory<StockMovementFactory> */
     use HasFactory;
 
-    protected $fillable = ['variant_id', 'actor_id', 'delta', 'balance_after', 'type', 'operation_key', 'reference', 'reason', 'context'];
+    protected $fillable = ['variant_id', 'actor_id', 'delta', 'balance_after', 'type', 'operation_key', 'reference', 'reason', 'context', 'occurred_at'];
 
     protected function casts(): array
     {
-        return ['context' => 'array', 'delta' => 'integer', 'balance_after' => 'integer'];
+        return ['context' => 'array', 'delta' => 'integer', 'balance_after' => 'integer', 'occurred_at' => 'datetime'];
     }
 
     public function variant(): BelongsTo
