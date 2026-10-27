@@ -7,6 +7,7 @@ use App\Models\AuditEvent;
 use App\Models\User;
 use App\Services\Auth\Reauthentication;
 use App\Services\Identity\EmployeeService;
+use App\Services\Settings\PreferenceService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ class EmployeeController extends Controller
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:120'], 'role' => ['nullable', 'in:manager,staff'], 'status' => ['nullable', 'in:active,inactive'], 'tab' => ['nullable', 'in:employees,roles']]);
         try {
             $employees = User::when(! empty($filters['q']), fn ($q) => $q->where(fn ($s) => $s->where('name', 'like', '%'.$filters['q'].'%')->orWhere('username', 'like', '%'.$filters['q'].'%')))
-                ->when(! empty($filters['role']), fn ($q) => $q->where('role', $filters['role']))->when(! empty($filters['status']), fn ($q) => $q->where('active', $filters['status'] === 'active'))->orderBy('name')->paginate(20)->withQueryString();
+                ->when(! empty($filters['role']), fn ($q) => $q->where('role', $filters['role']))->when(! empty($filters['status']), fn ($q) => $q->where('active', $filters['status'] === 'active'))->orderBy('name')->paginate(app(PreferenceService::class)->rows($request->user()))->withQueryString();
             $summary = ['total' => User::count(), 'active' => User::where('active', true)->count(), 'inactive' => User::where('active', false)->count(), 'managers' => User::where('active', true)->where('role', 'manager')->count()];
             $lastSignIns = AuditEvent::where('type', 'Sign in')->whereIn('actor_id', $employees->pluck('id'))->selectRaw('actor_id, MAX(created_at) as signed_in_at')->groupBy('actor_id')->pluck('signed_in_at', 'actor_id');
 

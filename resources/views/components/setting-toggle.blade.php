@@ -1,0 +1,2 @@
+@props(['name','label','checked'=>false,'help'=>null])
+<div class="setting-toggle-row"><div><label for="setting-{{ $name }}">{{ $label }}</label>@if($help)<p>{{ $help }}</p>@endif</div><label class="setting-switch"><input type="hidden" name="values[{{ $name }}]" value="0"><input type="checkbox" role="switch" id="setting-{{ $name }}" name="values[{{ $name }}]" value="1" @checked($checked)><span class="switch-indicator" aria-hidden="true"></span><span data-switch-label aria-hidden="true">{{ $checked?'Enabled':'Disabled' }}</span></label></div>

@@ -3,16 +3,16 @@
 @section('content')
 @php
 $editing = $product->exists;
-$rows = old('variants', $editing ? $product->variants->whereNull('archived_at')->map(fn($variant)=>['id'=>$variant->id,'sku'=>$variant->sku,'name'=>$variant->name,'unit_id'=>$variant->unit_id,'price'=>\App\Support\Money::format($variant->price_centavos),'threshold'=>$variant->threshold,'barcode'=>$variant->barcode])->values()->all() : [['sku'=>'','name'=>'Standard','unit_id'=>$units->first()?->id,'price'=>'','threshold'=>3]]);
-$first = $rows[0] ?? ['sku'=>'','name'=>'Standard','price'=>'','threshold'=>3,'unit_id'=>$units->first()?->id];
+$rows = old('variants', $editing ? $product->variants->whereNull('archived_at')->map(fn($variant)=>['id'=>$variant->id,'sku'=>$variant->sku,'name'=>$variant->name,'unit_id'=>$variant->unit_id,'price'=>\App\Support\Money::format($variant->price_centavos),'threshold'=>$variant->threshold,'barcode'=>$variant->barcode])->values()->all() : [['sku'=>'','name'=>'Standard','unit_id'=>$units->first()?->id,'price'=>'','threshold'=>$defaultThreshold]]);
+$first = $rows[0] ?? ['sku'=>'','name'=>'Standard','price'=>'','threshold'=>$defaultThreshold,'unit_id'=>$units->first()?->id];
 @endphp
 <header class="page-heading"><div><h1>{{ $editing?'Edit product':'Add product' }}</h1><p>{{ $editing?'Update product information; existing sales retain their original details.':'Create a product with a unique SKU and selling unit.' }}</p></div><a class="button button-secondary" href="{{ route('inventory.index') }}">Back to inventory</a></header>
-<form method="post" enctype="multipart/form-data" action="{{ $editing?route('products.update',$product):route('products.store') }}" class="panel product-form" data-product-form>
+<form method="post" enctype="multipart/form-data" action="{{ $editing?route('products.update',$product):route('products.store') }}" class="panel product-form" data-product-form data-image-limit="{{ $maxImageMb }}">
 @csrf @if($editing)@method('PUT')@endif
 <h2>{{ $editing?'Product information':'New product' }}</h2>
 @if($errors->any())<div class="inline-alert error" role="alert"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 <div class="product-form-workspace">
-<div class="image-upload"><h3>Product image (optional)</h3><label class="image-drop" for="image" data-image-drop><img id="image-preview" src="{{ $product->image_path?route('products.image',$product):asset('assets/icons/image-unavailable.svg') }}" class="{{ $product->image_path?'selected-image':'fallback-image' }}" alt=""><strong>Drop a product image here</strong><p>or select a file from your computer</p></label><input id="image" type="file" name="image" accept=".jpg,.jpeg,.png,.webp" data-image-input class="visually-hidden" aria-label="Product image"><button type="button" class="button button-primary" data-image-choose>Upload image</button><p id="image-feedback" role="status"></p><p>JPG, PNG or WebP · up to 5 MB<br>Recommended: 1024 × 1024 px.<br>Keep the whole product visible.</p></div>
+<div class="image-upload"><h3>Product image (optional)</h3><label class="image-drop" for="image" data-image-drop><img id="image-preview" src="{{ $product->image_path?route('products.image',$product):asset('assets/icons/image-unavailable.svg') }}" class="{{ $product->image_path?'selected-image':'fallback-image' }}" alt=""><strong>Drop a product image here</strong><p>or select a file from your computer</p></label><input id="image" type="file" name="image" accept=".jpg,.jpeg,.png,.webp" data-image-input class="visually-hidden" aria-label="Product image"><button type="button" class="button button-primary" data-image-choose>Upload image</button><p id="image-feedback" role="status"></p><p>JPG, PNG or WebP · up to {{ $maxImageMb }} MB<br>Recommended: 1024 × 1024 px.<br>Keep the whole product visible.</p></div>
 <div class="product-form-fields">
 <h3>General product details</h3>
 <div class="form-row"><x-input id="product-name" name="name" label="Product name" :value="old('name',$product->name)" required maxlength="160" /><x-input id="sku-0" name="variants[0][sku]" label="SKU" :value="$first['sku']" required maxlength="100" /></div>
@@ -26,7 +26,7 @@ $first = $rows[0] ?? ['sku'=>'','name'=>'Standard','price'=>'','threshold'=>3,'u
 </div></div>
 <div id="additional-variants" class="additional-variants">@foreach(array_slice($rows,1,null,true) as $index=>$row)@include('inventory.variant-fields',compact('index','row','units'))@endforeach</div>
 <x-button variant="secondary" data-add-variant>Add another variant</x-button>
-<template id="variant-template">@include('inventory.variant-fields',['index'=>'__INDEX__','row'=>['sku'=>'','name'=>'Standard','price'=>'','threshold'=>3,'unit_id'=>$units->first()?->id],'units'=>$units])</template>
+<template id="variant-template">@include('inventory.variant-fields',['index'=>'__INDEX__','row'=>['sku'=>'','name'=>'Standard','price'=>'','threshold'=>$defaultThreshold,'unit_id'=>$units->first()?->id],'units'=>$units])</template>
 <footer class="form-actions"><p>Required fields are marked *. Product image is optional.</p><div class="action-row"><a class="button button-secondary" href="{{ route('inventory.index') }}">Cancel</a><x-button type="submit">Save product</x-button></div></footer>
 </form>
 @endsection

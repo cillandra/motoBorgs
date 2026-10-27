@@ -1,17 +1,21 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RecoveryController;
 use App\Http\Controllers\RefundController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
@@ -66,4 +70,17 @@ Route::post('/access/reset', [RecoveryController::class, 'complete'])->middlewar
 Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
     Route::get('/access/change', [RecoveryController::class, 'change'])->name('password.change');
     Route::post('/access/change', [RecoveryController::class, 'update'])->middleware('throttle:5,15')->name('password.update');
+});
+Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
+    Route::post('/settings/account/password', [AccountController::class, 'password'])->middleware('throttle:5,15')->name('account.password');
+    Route::post('/settings/account/sessions', [AccountController::class, 'sessions'])->middleware('throttle:5,15')->name('account.sessions');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'all'])->name('notifications.all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->whereNumber('notification')->name('notifications.read');
+    Route::middleware('manager')->group(function (): void {
+        Route::get('/settings/receipt-preview', [SettingsController::class, 'receiptPreview'])->name('settings.receipt-preview');
+        Route::put('/settings/{section}', [SettingsController::class, 'update'])->name('settings.update');
+    });
 });

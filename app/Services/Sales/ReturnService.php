@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Variant;
 use App\Services\Audit\AuditRecorder;
 use App\Services\Inventory\StockLedger;
+use App\Services\Settings\NotificationService;
 use App\Services\System\OperationGuard;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +40,8 @@ class ReturnService
                 $request->lines()->create(['sale_line_id' => $id, 'quantity' => $quantity]);
             }
             app(AuditRecorder::class)->record($actor, 'Return requested', 'sales', 'return', (string) $request->id, 'success', ['sale_id' => $sale->id, 'reason' => $reason]);
+
+            app(NotificationService::class)->publish('return_requested', 'return', (string) $request->id);
 
             return $request->fresh(['lines.saleLine', 'sale']);
         }, 3));
@@ -86,6 +89,7 @@ class ReturnService
                 'review_reason' => trim($reason), 'accepted_at' => $accept ? now() : null]);
             app(AuditRecorder::class)->record($manager, $accept ? 'Return accepted' : 'Return rejected', 'sales', 'return', (string) $request->id, 'success',
                 ['sale_id' => $sale->id, 'requester_id' => $request->requester_id, 'reason' => $reason]);
+            app(NotificationService::class)->publish('return_decided', 'return', (string) $request->id);
 
             return $request->fresh(['lines.saleLine', 'refunds']);
         }, 3));

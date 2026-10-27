@@ -7,6 +7,7 @@ use App\Models\ReturnRequest;
 use App\Models\Sale;
 use App\Services\Auth\Reauthentication;
 use App\Services\Sales\ReturnService;
+use App\Services\Settings\PreferenceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -17,7 +18,7 @@ class ReturnController extends Controller
         $filters = $request->validate(['status' => ['nullable', 'in:pending,accepted,rejected']]);
         $returns = ReturnRequest::with(['sale', 'requester', 'refunds', 'lines.saleLine' => fn ($line) => $line->withSum(['returnLines as accepted_return_quantity' => fn ($returned) => $returned->whereHas('request', fn ($request) => $request->where('status', 'accepted'))], 'quantity')])->withCount('lines')
             ->when(! $request->user()->isManager(), fn ($q) => $q->whereHas('sale', fn ($sale) => $sale->where('cashier_id', $request->user()->id)))
-            ->when(! empty($filters['status']), fn ($q) => $q->where('status', $filters['status']))->latest('id')->paginate(20)->withQueryString();
+            ->when(! empty($filters['status']), fn ($q) => $q->where('status', $filters['status']))->latest('id')->paginate(app(PreferenceService::class)->rows($request->user()))->withQueryString();
 
         return view('sales.returns', compact('returns', 'filters'));
     }

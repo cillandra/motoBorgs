@@ -73,7 +73,7 @@ if (form) {
             const response = await fetch(form.dataset.statusUrl.replace('ATTEMPT', encodeURIComponent(attempt.payload.request_key)), { headers: { Accept: 'application/json' } });
             if (!response.ok) throw new Error('Status is unavailable. Keep this attempt and retry the status check.');
             const data = await response.json();
-            if (data.status === 'completed') { dialog.close(); if (window.motoModal) await window.motoModal.openReceipt(data.receipt_url); else window.location.assign(data.receipt_url); return; }
+            if (data.status === 'completed') { document.dispatchEvent(new CustomEvent('moto:feedback',{detail:{tone:'success'}})); dialog.close(); if (window.motoModal) await window.motoModal.openReceipt(data.receipt_url); else window.location.assign(data.receipt_url); return; }
             message('No completed sale was found for this attempt yet. Retry the same attempt; do not collect payment again.');
         } catch (error) { message(error.message); }
         finally { lock(false); }
@@ -108,7 +108,7 @@ if (form) {
                 throw new Error(data?.message || 'The checkout result is unconfirmed.');
             }
             if (!data?.receipt_url) throw new Error('The checkout result is unconfirmed.');
-            dialog.close(); if (window.motoModal) await window.motoModal.openReceipt(data.receipt_url); else window.location.assign(data.receipt_url);
+            document.dispatchEvent(new CustomEvent('moto:feedback',{detail:{tone:'success'}})); dialog.close(); if (window.motoModal) await window.motoModal.openReceipt(data.receipt_url); else window.location.assign(data.receipt_url);
         } catch (error) {
             if (!knownFailure) {
                 uncertain = true;
@@ -156,8 +156,9 @@ document.addEventListener('moto:content-ready', (event) => initializeCheckout(ev
 
 
 window.addEventListener('beforeprint', () => {
-    const paper = document.querySelector('[data-workspace-modal][open] [data-receipt] .receipt-paper')
-        || document.querySelector('#main-content [data-receipt] .receipt-paper');
-    document.querySelectorAll('.receipt-print-target').forEach((element) => element.classList.remove('receipt-print-target'));
-    paper?.classList.add('receipt-print-target');
+    document.querySelectorAll('.receipt-print-clone').forEach(copy=>copy.remove());
+    const paper=document.querySelector('[data-workspace-modal][open] [data-receipt] .receipt-paper') || document.querySelector('[data-workspace-modal][open] [data-receipt-preview] .receipt-paper') || document.querySelector('#main-content [data-receipt] .receipt-paper') || document.querySelector('#main-content [data-receipt-preview] .receipt-paper');
+    document.querySelectorAll('.receipt-print-target').forEach(element=>element.classList.remove('receipt-print-target'));paper?.classList.add('receipt-print-target');
+    if(paper){const count=Math.max(1,Math.min(3,Number(paper.closest('[data-receipt-copies]')?.dataset.receiptCopies||1)));for(let index=1;index<count;index++){const copy=paper.cloneNode(true);copy.classList.add('receipt-print-clone');const label=copy.querySelector('.receipt-copy');if(label&&!label.textContent.includes('SAMPLE'))label.textContent='COPY';paper.parentElement.insertBefore(copy,paper.nextSibling);}}
 });
+window.addEventListener('afterprint',()=>document.querySelectorAll('.receipt-print-clone').forEach(copy=>copy.remove()));

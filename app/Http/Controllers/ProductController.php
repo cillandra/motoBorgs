@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\Unit;
 use App\Services\Catalog\ProductService;
 use Illuminate\Http\Request;
@@ -12,14 +13,21 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    private function defaults(): array
+    {
+        $inventory = Setting::where('section', 'inventory')->first()?->value ?? [];
+
+        return ['defaultThreshold' => (int) ($inventory['threshold'] ?? 3), 'maxImageMb' => max(1, min(5, (int) ($inventory['max_image_mb'] ?? 5)))];
+    }
+
     public function create(): mixed
     {
-        return view('inventory.form', ['product' => new Product, 'categories' => Category::orderBy('name')->get(), 'units' => Unit::all()]);
+        return view('inventory.form', ['product' => new Product, 'categories' => Category::orderBy('name')->get(), 'units' => Unit::all()] + $this->defaults());
     }
 
     public function edit(Product $product): mixed
     {
-        return view('inventory.form', ['product' => $product->load('variants.unit'), 'categories' => Category::orderBy('name')->get(), 'units' => Unit::all()]);
+        return view('inventory.form', ['product' => $product->load('variants.unit'), 'categories' => Category::orderBy('name')->get(), 'units' => Unit::all()] + $this->defaults());
     }
 
     public function store(ProductRequest $request, ProductService $service): mixed

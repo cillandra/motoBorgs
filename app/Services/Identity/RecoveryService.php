@@ -5,6 +5,7 @@ namespace App\Services\Identity;
 use App\Models\AccessResetToken;
 use App\Models\User;
 use App\Services\Audit\AuditRecorder;
+use App\Services\Settings\NotificationService;
 use App\Services\System\OperationGuard;
 use App\Support\PasswordPolicy;
 use Illuminate\Support\Facades\DB;
@@ -27,10 +28,12 @@ class RecoveryService
                 abort_if($manager->id === $employee->id, 409, 'Use My account to change your own password.');
                 AccessResetToken::where('user_id', $employee->id)->whereNull('used_at')->update(['used_at' => now()]);
                 $token = Str::random(64);
-                AccessResetToken::create(['user_id' => $employee->id, 'issued_by' => $manager->id, 'token_hash' => hash('sha256', $token), 'expires_at' => now()->addMinutes(15)]);
+                $reset = AccessResetToken::create(['user_id' => $employee->id, 'issued_by' => $manager->id, 'token_hash' => hash('sha256', $token), 'expires_at' => now()->addMinutes(15)]);
                 $employee->forceFill(['force_password_change' => true, 'password' => Hash::make(Str::random(64)), 'remember_token' => null, 'version' => $employee->version + 1])->save();
                 app(SessionService::class)->revoke($employee);
                 app(AuditRecorder::class)->record($manager, 'Recovery code issued', 'management', 'employee', (string) $employee->id, 'success');
+
+                app(NotificationService::class)->publish('recovery', 'employee', (string) $employee->id, ['event_id' => $reset->id.':issued']);
 
                 return $token;
             }, 3));
@@ -54,6 +57,7 @@ class RecoveryService
                 $reset->update(['used_at' => now()]);
                 app(SessionService::class)->revoke($user);
                 app(AuditRecorder::class)->record($user, 'Assisted recovery completed', 'authentication', 'employee', (string) $user->id, 'success');
+                app(NotificationService::class)->publish('recovery', 'employee', (string) $user->id, ['event_id' => $reset->id.':completed']);
             }, 3));
         } catch (HttpException $error) {
             app(AuditRecorder::class)->record(null, 'Recovery code rejected', 'authentication', 'recovery', 'unverified', 'denied');

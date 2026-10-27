@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Sale;
+use App\Models\Setting;
 use App\Models\Variant;
 use App\Services\Catalog\CatalogQuery;
 use App\Services\Pos\CartService;
@@ -29,9 +30,10 @@ class PosController extends Controller
         $filters = array_diff_key($data, ['cart' => true]);
         $variants = $catalog->search($request->user(), $filters, 24);
         $categories = Category::orderBy('name')->get();
+        $discountCap = max(0, min(10, (int) (Setting::where('section', 'sales')->first()?->value['discount_cap'] ?? 10)));
         $heldCarts = Cart::where('cashier_id', $request->user()->id)->where('status', 'held')->withCount('lines')->latest()->get();
 
-        return view('pos.index', compact('cart', 'quote', 'filters', 'variants', 'categories', 'heldCarts'));
+        return view('pos.index', compact('cart', 'quote', 'filters', 'variants', 'categories', 'heldCarts', 'discountCap'));
     }
 
     public function lookup(Request $request): mixed

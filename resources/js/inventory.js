@@ -28,8 +28,8 @@ function initializeInventory(root = document) {
             const file = image.files[0];
             if (!file) return;
             const feedback = form.querySelector('#image-feedback');
-            if (file.size > 5 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-                feedback.textContent = 'Choose a JPG, PNG or WebP image up to 5 MB.';
+            if (file.size > Number(form.dataset.imageLimit || 5) * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                feedback.textContent = 'Choose a JPG, PNG or WebP image up to ' + (form.dataset.imageLimit || 5) + ' MB.';
                 image.value = '';
                 return;
             }

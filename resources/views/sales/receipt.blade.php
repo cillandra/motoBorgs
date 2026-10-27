@@ -1,8 +1,8 @@
 @extends('layouts.app')
 @section('title','Sale completed')
 @section('content')
-<section class="receipt-result" data-receipt data-user="{{ auth()->id() }}" data-request-key="{{ $sale->request_key }}"><header><h1>Sale completed</h1><p>Payment recorded · exact SKU stock updated</p></header>
-<article class="receipt-paper" style="--receipt-width:{{ $width }}mm">
+<section class="receipt-result" data-receipt data-receipt-copies="{{ $receiptSettings['copies']??1 }}" data-user="{{ auth()->id() }}" data-request-key="{{ $sale->request_key }}"><header><h1>Sale completed</h1><p>Payment recorded · exact SKU stock updated</p></header>
+<article class="receipt-paper" style="--receipt-width:{{ $width }}mm">@if($receiptSettings['show_logo']??true)<img class="receipt-logo" src="{{ asset('assets/brand/borgs-logo.png') }}" width="64" height="64" alt="">@endif
 <h2>{{ $shop['shop_name']??'BORG’S Motorcycle Parts and Accessories' }}</h2>@if(!empty($shop['address']))<p>{{ $shop['address'] }}</p>@endif @if(!empty($shop['contact']))<p>{{ $shop['contact'] }}</p>@endif
 <strong class="receipt-copy">{{ $copy?'COPY':'ORIGINAL PREVIEW' }}</strong>
 <p>Sale MOTO-{{ str_pad($sale->id,8,'0',STR_PAD_LEFT) }}<br>{{ $sale->created_at->timezone('Asia/Manila')->format('d M Y, H:i') }}<br>Cashier: {{ $sale->cashier_name }}<br>Payment: {{ ['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'][$sale->payment->method] }}</p>

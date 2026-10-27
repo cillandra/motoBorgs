@@ -7,6 +7,7 @@ if (pos?.dataset.openHeld === '1') { pos.querySelector('#held-carts')?.showModal
 if (pos) {
     let pending = false;
     const showError = (message, form) => {
+        document.dispatchEvent(new CustomEvent('moto:feedback',{detail:{tone:'error'}}));
         const element = form?.closest('dialog')?.querySelector('[data-form-error]') || pos.querySelector('[data-pos-error]');
         element.textContent = message;
         element.hidden = false;

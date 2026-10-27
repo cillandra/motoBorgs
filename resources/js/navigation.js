@@ -8,7 +8,7 @@ document.addEventListener('click', (event) => {
             button.setAttribute('aria-label', expanded ? 'Collapse sidebar' : 'Expand sidebar');
         });
     }
-    if (event.target.closest('[data-theme-toggle]')) document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    if (event.target.closest('[data-theme-toggle]')) document.dispatchEvent(new CustomEvent('moto:toggle-theme'));
     const toggle = event.target.closest('[data-password-toggle]');
     if (toggle) {
         const input = toggle.closest('.input-wrap')?.querySelector('input') || document.getElementById(toggle.dataset.passwordToggle);

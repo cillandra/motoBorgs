@@ -4,8 +4,10 @@ namespace App\Services\Pos;
 
 use App\Models\Approval;
 use App\Models\Cart;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\Audit\AuditRecorder;
+use App\Services\Settings\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
@@ -31,8 +33,9 @@ class ApprovalService
             $service->editable($cashier, $cart, $expectedVersion);
             if ($action === 'discount') {
                 $quote = $service->quote($cashier, $cart, false);
+                $cap = max(0, min(10, (int) (Setting::where('section', 'sales')->first()?->value['discount_cap'] ?? 10)));
                 $amount = $parameters['discount_centavos'] ?? null;
-                abort_unless(is_int($amount) && $amount > 0 && $amount <= intdiv($quote['subtotal'], 10) && $quote['lines'] !== [], 422, 'Discount must be positive and at most 10% of the subtotal.');
+                abort_unless(is_int($amount) && $amount > 0 && $amount <= intdiv($quote['subtotal'] * $cap, 100) && $quote['lines'] !== [], 422, 'Discount must be positive and within the configured '.$cap.'% cap.');
                 abort_if($quote['warnings'] !== [], 409, 'Resolve the order warnings before approving a discount.');
                 $service->invalidate($cart);
                 $cart->discount_centavos = $amount;
@@ -46,6 +49,8 @@ class ApprovalService
                 'cart_version' => $cart->version, 'action' => $action, 'parameters' => $parameters, 'reason' => trim($reason), 'expires_at' => now()->addMinutes(5)]);
             app(AuditRecorder::class)->record($manager, 'Manager approval granted', 'pos', 'cart', (string) $cart->id, 'success',
                 ['requester_id' => $cashier->id, 'approver_id' => $manager->id, 'reason' => $reason, 'amount' => $parameters['discount_centavos'] ?? 0]);
+
+            app(NotificationService::class)->publish('approval_decided', 'approval', (string) $approval->id);
 
             return $approval;
         }, 3);

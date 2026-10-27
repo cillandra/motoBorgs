@@ -6,6 +6,7 @@ use App\Models\AuditEvent;
 use App\Models\User;
 use App\Services\Audit\ActivityQuery;
 use App\Services\Reporting\CsvExporter;
+use App\Services\Settings\PreferenceService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class ActivityController extends Controller
     {
         $filters = $this->filters($request);
         try {
-            $events = $query->search($request->user(), $filters);
+            $events = $query->search($request->user(), $filters, app(PreferenceService::class)->rows($request->user()));
             $employees = User::orderBy('name')->get(['id', 'name']);
             $types = AuditEvent::distinct()->orderBy('type')->pluck('type');
             $modules = AuditEvent::distinct()->orderBy('module')->pluck('module');

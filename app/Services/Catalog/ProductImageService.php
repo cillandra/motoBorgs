@@ -3,6 +3,7 @@
 namespace App\Services\Catalog;
 
 use App\Models\Product;
+use App\Models\Setting;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,10 +16,11 @@ class ProductImageService
 {
     public function replace(Product $product, UploadedFile $file): string
     {
+        $maximum = max(1, min(5, (int) (Setting::where('section', 'inventory')->first()?->value['max_image_mb'] ?? 5)));
         $mime = $file->getMimeType();
         $extensions = ['image/jpeg' => ['jpg', 'jpeg'], 'image/png' => ['png'], 'image/webp' => ['webp']];
-        if ($file->getSize() > 5 * 1024 * 1024 || ! isset($extensions[$mime]) || ! in_array(strtolower($file->getClientOriginalExtension()), $extensions[$mime], true)) {
-            throw ValidationException::withMessages(['image' => 'Use a JPG, PNG or WebP image no larger than 5 MB.']);
+        if ($file->getSize() > $maximum * 1024 * 1024 || ! isset($extensions[$mime]) || ! in_array(strtolower($file->getClientOriginalExtension()), $extensions[$mime], true)) {
+            throw ValidationException::withMessages(['image' => 'Use a JPG, PNG or WebP image no larger than '.$maximum.' MB.']);
         }
         $bytes = file_get_contents($file->getRealPath());
         $size = @getimagesizefromstring($bytes);

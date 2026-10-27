@@ -12,3 +12,6 @@ import './returns.js';
 import './dashboard.js';
 import './reports.js';
 import './identity.js';
+import './settings.js';
+import './feedback.js';
+import './notifications.js';

@@ -4,6 +4,7 @@ namespace App\Services\Catalog;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\Audit\AuditRecorder;
 use App\Support\Money;
@@ -34,6 +35,7 @@ class ProductService
                     if (! $variant) {
                         throw ValidationException::withMessages(['variants.'.$index.'.id' => 'This variant does not belong to the product.']);
                     }
+                    $variant->threshold = $row['threshold'] ?? ($variant->threshold ?? (int) (Setting::where('section', 'inventory')->first()?->value['threshold'] ?? 3));
                     $variant->fill(Arr::only($row, ['sku', 'name', 'unit_id', 'threshold']));
                     $variant->barcode = $row['barcode'] ?? null;
                     $variant->price_centavos = Money::parse($row['price']);

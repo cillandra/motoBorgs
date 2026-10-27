@@ -38,6 +38,7 @@ if (modal) {
         closeNow();
     }
     function failure(message, url = null) {
+        document.dispatchEvent(new CustomEvent('moto:feedback',{detail:{tone:'error'}}));
         const alert = document.createElement('div');
         alert.className = 'inline-alert error';
         alert.setAttribute('role', 'alert');
@@ -110,6 +111,7 @@ if (modal) {
         } finally { setBusy(false); if (modal.open) modal.querySelector('[data-workspace-close]').focus(); }
     }
     function toast(message) {
+        document.dispatchEvent(new CustomEvent('moto:feedback',{detail:{tone:'success'}}));
         const fragment = document.getElementById('moto-saved-toast').content.cloneNode(true);
         fragment.querySelector('[data-saved-message]').textContent = message;
         document.body.append(fragment);

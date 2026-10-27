@@ -25,7 +25,9 @@ class EnforceSessionLifetime
 
             return $request->expectsJson() ? response()->json(['message' => 'Your session has expired. Sign in again.'], 401) : redirect()->route('login');
         }
-        $request->session()->put('moto_last_activity_at', now()->timestamp);
+        if (! $request->routeIs('notifications.index')) {
+            $request->session()->put('moto_last_activity_at', now()->timestamp);
+        }
 
         return $next($request);
     }

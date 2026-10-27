@@ -6,6 +6,7 @@ use App\Models\StockMovement;
 use App\Models\User;
 use App\Models\Variant;
 use App\Services\Audit\AuditRecorder;
+use App\Services\Settings\NotificationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,7 @@ class StockLedger
 
                     return $existing;
                 }
+                $beforeBalance = $locked->stock;
                 $balance = $locked->stock + $delta;
                 abort_if($balance < 0, 409, 'Not enough stock remains for this operation.');
                 abort_if($balance > 1000000, 422, 'Stock exceeds the supported quantity limit.');
@@ -42,6 +44,10 @@ class StockLedger
                     'receive' => 'Stock received','count_adjustment' => 'Stock adjusted','sale' => 'Stock sold','return' => 'Stock returned',default => 'Opening stock'
                 };
                 app(AuditRecorder::class)->record($actor, $label, 'inventory', 'variant', (string) $locked->id, 'success', ['reason' => $reason, 'reference' => $context['reference'] ?? null, 'delta' => $delta, 'balance' => $balance]);
+
+                if ($type !== 'opening' && (($beforeBalance > $locked->threshold && $balance <= $locked->threshold) || ($beforeBalance > 0 && $balance === 0))) {
+                    app(NotificationService::class)->publish('stock_attention', 'variant', (string) $locked->id, ['event_id' => $movement->id]);
+                }
 
                 return $movement;
             }, 3);
