@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Sale extends Model
@@ -39,6 +40,11 @@ class Sale extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(PaymentRecord::class);
+    }
+
+    public function refunds(): HasManyThrough
+    {
+        return $this->hasManyThrough(RefundRecord::class, ReturnRequest::class);
     }
 
     public function returns(): HasMany

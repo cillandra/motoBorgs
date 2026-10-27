@@ -7,6 +7,7 @@ use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RefundController;
 use App\Http\Controllers\ReturnController;
+use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
@@ -32,4 +33,8 @@ Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): vo
         Route::post('/returns/{returnRequest}/review', [ReturnController::class, 'review'])->name('returns.review');
         Route::post('/returns/{returnRequest}/refund', [RefundController::class, 'store'])->name('refunds.store');
     });
+});
+Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
+    Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
+    Route::get('/sales/{sale}', [SalesController::class, 'show'])->name('sales.show');
 });

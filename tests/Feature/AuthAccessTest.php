@@ -98,7 +98,7 @@ class AuthAccessTest extends TestCase
     public function test_authenticated_dashboard_renders_the_account_role(): void
     {
         $this->actingAs($this->manager())->withSession(['moto_signed_in_at' => now()->timestamp, 'moto_last_activity_at' => now()->timestamp]);
-        $this->get('/dashboard')->assertOk()->assertSee('Manager workspace')->assertSee('Dashboard');
+        $this->get('/dashboard')->assertOk()->assertSee('Shop overview')->assertSee('Manager')->assertSee('Dashboard');
     }
 
     public function test_csrf_is_required_outside_the_test_bypass(): void

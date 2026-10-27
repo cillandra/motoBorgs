@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title','Sales / POS')
 @section('content')
-<div class="pos-page" data-pos data-cart="{{ $cart->id }}" data-version="{{ $cart->version }}" data-mutate="{{ route('pos.mutate',$cart) }}" data-lookup="{{ route('pos.lookup') }}">
+<div class="pos-page" data-pos data-open-held="{{ request()->boolean('held')?'1':'0' }}" data-cart="{{ $cart->id }}" data-version="{{ $cart->version }}" data-mutate="{{ route('pos.mutate',$cart) }}" data-lookup="{{ route('pos.lookup') }}">
 <header class="page-heading"><div><h1>Sales / POS</h1><p>{{ auth()->user()->name }} · {{ ucfirst(auth()->user()->role) }} access</p></div><x-button variant="secondary" data-dialog-open="held-carts">Held carts ({{ $heldCarts->count() }})</x-button></header>
 <div class="inline-alert error" data-pos-error role="alert" hidden></div>
 @if($errors->any())<div class="inline-alert error" role="alert">{{ $errors->first() }}</div>@endif

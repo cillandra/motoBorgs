@@ -9,3 +9,4 @@ import './checkout.js';
 import './modals.js';
 
 import './returns.js';
+import './dashboard.js';

@@ -3,6 +3,7 @@ function initializePos(root = document) {
 const pos = root.querySelector('[data-pos]');
 if (pos && initializedPos.has(pos)) return;
 if (pos) initializedPos.add(pos);
+if (pos?.dataset.openHeld === '1') { pos.querySelector('#held-carts')?.showModal(); const url = new URL(window.location.href); url.searchParams.delete('held'); history.replaceState(null, '', url); }
 if (pos) {
     let pending = false;
     const showError = (message, form) => {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockController;
@@ -24,7 +25,7 @@ Route::middleware('guest')->group(function (): void {
 });
 Route::post('/logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');
 Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
-    Route::get('/dashboard', fn () => view('dashboard.index'))->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/{variant}', [InventoryController::class, 'show'])->name('inventory.show');
     Route::get('/products/{product}/image', [ProductController::class, 'image'])->name('products.image');
