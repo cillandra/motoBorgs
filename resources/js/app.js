@@ -11,3 +11,4 @@ import './modals.js';
 import './returns.js';
 import './dashboard.js';
 import './reports.js';
+import './identity.js';

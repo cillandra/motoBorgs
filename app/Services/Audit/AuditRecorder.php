@@ -24,6 +24,11 @@ class AuditRecorder
         ]);
     }
 
+    public function safeContext(array $context): array
+    {
+        return $this->redact(array_intersect_key($context, array_flip(['reason', 'reference', 'quantity', 'delta', 'balance', 'method', 'amount', 'requester_id', 'approver_id', 'changes', 'cart_id', 'sale_id', 'variant_id', 'status', 'backup_id'])));
+    }
+
     /** @param array<array-key, mixed> $values @return array<array-key, mixed> */
     private function redact(array $values): array
     {

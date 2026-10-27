@@ -8,6 +8,7 @@
 <div class="system-identity"><h1 class="wordmark">MOTO</h1><span class="racing-signature"></span><p>Management of Transactions and Order</p><p class="shop-caption">For BORG’S Motorcycle Parts<br>and Accessories</p></div></div>
 </section>
 <section class="sign-in-panel">
+@if(session('status'))<p role="status">{{ session('status') }}</p>@endif
 <div class="welcome"><h2>Welcome back</h2><p>Sign in with your assigned account.</p></div>
 <form action="{{ route('login.store') }}" method="post" class="login-form" data-submit-form>
 @csrf
@@ -18,7 +19,7 @@
 @if($errors->any())<div class="inline-alert error" role="alert">{{ $errors->first() }}</div>@endif
 <x-button type="submit" class="login-submit">Sign in</x-button>
 </form>
-<div class="account-help"><p>Need access or a password reset?</p><strong>Contact your Manager.</strong></div>
+<div class="account-help"><p>Need access or a password reset?</p><strong>Contact your Manager.</strong><a class="button button-ghost" href="{{ route('recovery.form') }}">Use a Manager recovery code</a></div>
 </section>
 </main>
 </body></html>

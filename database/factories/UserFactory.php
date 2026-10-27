@@ -26,7 +26,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'username' => fake()->unique()->userName(),
+            'username' => mb_strtolower(fake()->unique()->userName()),
             'role' => 'staff',
             'active' => true,
             'email' => fake()->unique()->safeEmail(),

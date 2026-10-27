@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\RecoveryController;
 use App\Http\Controllers\RefundController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnController;
@@ -43,4 +46,24 @@ Route::middleware(['auth', 'active', 'session.lifetime', 'manager'])->group(func
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
     Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
+});
+Route::middleware(['auth', 'active', 'session.lifetime', 'manager'])->group(function (): void {
+    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
+    Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+    Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+    Route::post('/employees/{employee}/deactivate', [EmployeeController::class, 'status'])->name('employees.deactivate');
+    Route::post('/employees/{employee}/reactivate', [EmployeeController::class, 'status'])->name('employees.reactivate');
+    Route::post('/employees/{employee}/recovery', [RecoveryController::class, 'issue'])->name('employees.recovery');
+    Route::get('/activity', [ActivityController::class, 'index'])->name('activity.index');
+    Route::get('/activity/export', [ActivityController::class, 'export'])->name('activity.export');
+    Route::get('/activity/{event}', [ActivityController::class, 'show'])->name('activity.show');
+});
+Route::get('/access/reset', [RecoveryController::class, 'form'])->name('recovery.form');
+Route::post('/access/reset', [RecoveryController::class, 'complete'])->middleware('throttle:10,15')->name('recovery.complete');
+Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
+    Route::get('/access/change', [RecoveryController::class, 'change'])->name('password.change');
+    Route::post('/access/change', [RecoveryController::class, 'update'])->middleware('throttle:5,15')->name('password.update');
 });

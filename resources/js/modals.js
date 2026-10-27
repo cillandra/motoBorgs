@@ -8,7 +8,7 @@ if (modal) {
     let busy = false;
     let trigger = null;
     let currentUrl = null;
-    const contextualPath = /^(?:\/inventory\/\d+(?:\/stock)?|\/products\/(?:create|\d+\/edit)|\/sales\/\d+(?:\/receipt|\/returns)?|\/returns\/\d+|\/employees\/(?:create|\d+(?:\/edit)?))\/?$/;
+    const contextualPath = /^(?:\/inventory\/\d+(?:\/stock)?|\/products\/(?:create|\d+\/edit)|\/sales\/\d+(?:\/receipt|\/returns)?|\/returns\/\d+|\/employees\/(?:create|\d+(?:\/edit)?)|\/activity\/\d+)\/?$/;
     const announce = (root) => document.dispatchEvent(new CustomEvent('moto:content-ready', { detail: { root } }));
     const setBusy = (value) => {
         busy = value;
@@ -149,7 +149,20 @@ if (modal) {
             dirty = false;
             form.dataset.saved = 'true';
             setBusy(false);
-            if (data?.modal_url) {
+            if (data?.redirect) {
+                const next=new URL(data.redirect,window.location.href);
+                if(next.origin!==window.location.origin || next.pathname!=='/login')throw new Error('The sign-in destination is invalid.');
+                window.location.assign(next.href);return;
+            }
+            if (data?.modal_html) {
+                const returned=new DOMParser().parseFromString(data.modal_html,'text/html');
+                const main=returned.querySelector('#main-content');
+                if(!main)throw new Error('The private result could not be displayed. Check the employee account before issuing another code.');
+                main.querySelectorAll('script,meta,link').forEach(node=>node.remove());
+                title.textContent=main.querySelector('h1')?.textContent.trim()||'Result';
+                description.textContent=main.querySelector('h1')?.parentElement.querySelector('p')?.textContent.trim()||'';
+                content.replaceChildren(...main.childNodes);announce(content);content.scrollTop=0;
+            } else if (data?.modal_url) {
                 await open(data.modal_url, { force: true });
             } else {
                 closeNow();
@@ -180,7 +193,7 @@ if (modal) {
         if (link.hasAttribute('data-modal-link') || (inside && contextualPath.test(destination.pathname))) {
             event.preventDefault();
             if (!busy) open(destination.href);
-        } else if (inside && ['/inventory', '/pos', '/sales', '/employees', '/returns'].includes(destination.pathname)) {
+        } else if (inside && ['/inventory', '/pos', '/sales', '/employees', '/returns', '/activity', '/reports'].includes(destination.pathname)) {
             event.preventDefault();
             if (busy) return;
             (async () => {

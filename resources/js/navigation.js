@@ -22,5 +22,5 @@ document.addEventListener('submit', (event) => {
     const form = event.target;
     if (!form.matches('[data-submit-form]') || !form.checkValidity()) return;
     const button = form.querySelector('[type=submit]');
-    if (button) { button.disabled = true; button.textContent = 'Signing in…'; }
+    if (button) { button.disabled = true; button.textContent = form.dataset.submitLabel || 'Signing in…'; }
 });

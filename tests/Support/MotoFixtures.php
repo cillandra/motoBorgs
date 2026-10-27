@@ -13,12 +13,12 @@ trait MotoFixtures
 {
     protected function manager(): User
     {
-        return User::factory()->create(['role' => 'manager']);
+        return User::factory()->create(['role' => 'manager'])->refresh();
     }
 
     protected function staff(): User
     {
-        return User::factory()->create(['role' => 'staff']);
+        return User::factory()->create(['role' => 'staff'])->refresh();
     }
 
     protected function variant(int $stock = 3, int $price = 10000): Variant
