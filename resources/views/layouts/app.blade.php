@@ -4,7 +4,7 @@
 <body class="app-page">
 <a class="skip-link" href="#main-content">Skip to content</a>
 <x-sidebar />
-<div class="main-workspace"><x-topbar :title="trim($__env->yieldContent('title','Dashboard'))" />
+<div class="main-workspace"><x-topbar :title="html_entity_decode(trim($__env->yieldContent('title','Dashboard')), ENT_QUOTES, 'UTF-8')" />
 <main id="main-content" class="page-content">@if(session('status'))<x-toast>{{ session('status') }}</x-toast>@endif @yield('content')</main></div>
 <x-workspace-modal />
 </body></html>

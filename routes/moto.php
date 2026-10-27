@@ -6,6 +6,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RefundController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
@@ -37,4 +38,9 @@ Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): vo
 Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
     Route::get('/sales/{sale}', [SalesController::class, 'show'])->name('sales.show');
+});
+Route::middleware(['auth', 'active', 'session.lifetime', 'manager'])->group(function (): void {
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+    Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
 });
