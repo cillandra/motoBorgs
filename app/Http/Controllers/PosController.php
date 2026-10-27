@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\Variant;
 use App\Services\Catalog\CatalogQuery;
 use App\Services\Pos\CartService;
+use App\Services\System\OperationGuard;
 use Illuminate\Http\Request;
 
 class PosController extends Controller
@@ -20,7 +21,7 @@ class PosController extends Controller
             'sort' => ['nullable', 'in:name_asc,name_desc,price_asc,price_desc,sku,stock_asc,stock_desc'],
             'brand' => ['nullable', 'string', 'max:100'], 'compatibility' => ['nullable', 'string', 'max:200']]);
         $cart = ! empty($data['cart']) ? Cart::findOrFail($data['cart']) : Cart::where('cashier_id', $request->user()->id)->where('status', 'draft')->latest('id')->first();
-        $cart ??= Cart::create(['cashier_id' => $request->user()->id])->refresh();
+        $cart ??= app(OperationGuard::class)->write(fn () => Cart::create(['cashier_id' => $request->user()->id])->refresh());
         $service->owned($request->user(), $cart);
         if ($cart->status === 'completed') {
             return redirect()->route('sales.receipt', Sale::where('cart_id', $cart->id)->firstOrFail());

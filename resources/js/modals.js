@@ -8,7 +8,7 @@ if (modal) {
     let busy = false;
     let trigger = null;
     let currentUrl = null;
-    const contextualPath = /^(?:\/inventory\/\d+(?:\/stock)?|\/products\/(?:create|\d+\/edit)|\/sales\/\d+(?:\/receipt|\/returns)?|\/returns\/\d+|\/employees\/(?:create|\d+(?:\/edit)?)|\/activity\/\d+)\/?$/;
+    const contextualPath = /^(?:\/inventory\/\d+(?:\/stock)?|\/products\/(?:create|\d+\/edit)|\/sales\/\d+(?:\/receipt|\/returns)?|\/returns\/\d+|\/employees\/(?:create|\d+(?:\/edit)?)|\/activity\/\d+|\/backups\/(?:create|\d+)|\/maintenance)\/?$/;
     const announce = (root) => document.dispatchEvent(new CustomEvent('moto:content-ready', { detail: { root } }));
     const setBusy = (value) => {
         busy = value;
@@ -195,7 +195,7 @@ if (modal) {
         if (link.hasAttribute('data-modal-link') || (inside && contextualPath.test(destination.pathname))) {
             event.preventDefault();
             if (!busy) open(destination.href);
-        } else if (inside && ['/inventory', '/pos', '/sales', '/employees', '/returns', '/activity', '/reports'].includes(destination.pathname)) {
+        } else if (inside && ['/inventory', '/pos', '/sales', '/employees', '/returns', '/activity', '/reports', '/settings'].includes(destination.pathname)) {
             event.preventDefault();
             if (busy) return;
             (async () => {

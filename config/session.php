@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => env('SESSION_DRIVER', 'database') === 'database' ? 'guarded_database' : env('SESSION_DRIVER', 'array'),
 
     /*
     |--------------------------------------------------------------------------

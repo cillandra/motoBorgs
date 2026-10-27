@@ -7,9 +7,9 @@ use App\Models\Product;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Audit\AuditRecorder;
+use App\Services\System\OperationGuard;
 use App\Support\Money;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -21,7 +21,7 @@ class ProductService
         abort_unless($actor->isManager(), 403);
         $newImage = null;
         try {
-            return DB::transaction(function () use ($actor, $product, $validated, &$newImage): Product {
+            return app(OperationGuard::class)->transaction(function () use ($actor, $product, $validated, &$newImage): Product {
                 $data = Arr::only($validated, ['name', 'brand', 'category_id', 'part_number', 'compatibility', 'description']);
                 if (! empty($validated['category_name'])) {
                     $data['category_id'] = Category::firstOrCreate(['name' => trim($validated['category_name'])])->id;
@@ -62,7 +62,7 @@ class ProductService
     public function archive(User $actor, Product $product, string $reason = 'Manager archive confirmation'): void
     {
         abort_unless($actor->isManager(), 403);
-        DB::transaction(function () use ($actor, $product, $reason): void {
+        app(OperationGuard::class)->transaction(function () use ($actor, $product, $reason): void {
             $product = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
             if ($product->archived_at) {
                 return;
@@ -77,7 +77,7 @@ class ProductService
     public function restore(User $actor, Product $product): void
     {
         abort_unless($actor->isManager(), 403);
-        DB::transaction(function () use ($actor, $product): void {
+        app(OperationGuard::class)->transaction(function () use ($actor, $product): void {
             $product = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
             if (! $product->archived_at) {
                 return;

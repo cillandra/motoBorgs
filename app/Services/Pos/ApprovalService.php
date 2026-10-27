@@ -8,7 +8,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Services\Audit\AuditRecorder;
 use App\Services\Settings\NotificationService;
-use Illuminate\Support\Facades\DB;
+use App\Services\System\OperationGuard;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 
@@ -26,7 +26,7 @@ class ApprovalService
         }
         abort_unless(in_array($action, ['discount', 'cancel_exception'], true) && mb_strlen(trim($reason)) >= 3 && mb_strlen($reason) <= 1000, 422, 'Choose a valid approval action and reason.');
 
-        return DB::transaction(function () use ($manager, $cart, $expectedVersion, $action, $parameters, $reason): Approval {
+        return app(OperationGuard::class)->transaction(function () use ($manager, $cart, $expectedVersion, $action, $parameters, $reason): Approval {
             $cart = Cart::whereKey($cart->id)->lockForUpdate()->firstOrFail();
             $service = app(CartService::class);
             $cashier = $cart->cashier;
@@ -58,7 +58,7 @@ class ApprovalService
 
     public function consume(User $cashier, Approval $approval, Cart $cart, string $action): void
     {
-        DB::transaction(function () use ($cashier, $approval, $cart, $action): void {
+        app(OperationGuard::class)->transaction(function () use ($cashier, $approval, $cart, $action): void {
             $cart = Cart::whereKey($cart->id)->lockForUpdate()->firstOrFail();
             app(CartService::class)->owned($cashier, $cart);
             $approval = Approval::whereKey($approval->id)->lockForUpdate()->firstOrFail();

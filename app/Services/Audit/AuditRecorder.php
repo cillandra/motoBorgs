@@ -4,6 +4,7 @@ namespace App\Services\Audit;
 
 use App\Models\AuditEvent;
 use App\Models\User;
+use App\Services\System\OperationGuard;
 
 class AuditRecorder
 {
@@ -12,7 +13,7 @@ class AuditRecorder
     {
         $allowed = array_intersect_key($safeContext, array_flip(['reason', 'reference', 'quantity', 'delta', 'balance', 'method', 'amount', 'requester_id', 'approver_id', 'changes', 'cart_id', 'sale_id', 'variant_id', 'status', 'backup_id']));
 
-        return AuditEvent::create([
+        return app(OperationGuard::class)->administrative(fn () => AuditEvent::create([
             'actor_id' => $actor?->id,
             'actor_name' => $actor?->name ?? 'System',
             'type' => $type,
@@ -21,7 +22,7 @@ class AuditRecorder
             'subject_id' => $subjectId,
             'outcome' => $outcome,
             'context' => $this->redact($allowed),
-        ]);
+        ]));
     }
 
     public function safeContext(array $context): array

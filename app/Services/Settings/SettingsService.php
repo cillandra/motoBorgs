@@ -6,6 +6,7 @@ use App\Models\Approval;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Audit\AuditRecorder;
+use App\Services\System\DiagnosticsService;
 use App\Services\System\OperationGuard;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -41,7 +42,7 @@ class SettingsService
             'inventory' => ['threshold' => ['required', 'integer', 'between:0,1000000'], 'max_image_mb' => ['required', 'integer', 'between:1,5'], 'allow_negative_stock' => ['declined']],
             'notifications' => ['stock' => ['required', 'boolean'], 'requests' => ['required', 'boolean'], 'system' => ['required', 'boolean']],
             'security' => ['idle_minutes' => ['required', 'integer', 'between:5,60'], 'absolute_hours' => ['required', 'integer', 'between:1,12'], 'failed_attempts' => ['required', 'integer', 'between:3,5'], 'cooldown_minutes' => ['required', 'integer', 'between:15,60'], 'password_min' => ['required', 'integer', 'between:15,128']],
-            'backup' => ['enabled' => ['declined'], 'schedule' => ['required', 'date_format:H:i'], 'retain' => ['required', 'integer', 'in:7']],
+            'backup' => ['enabled' => ['required', 'boolean'], 'schedule' => ['required', 'date_format:H:i'], 'retain' => ['required', 'integer', 'in:7']],
             'system' => ['maintenance' => ['declined']],
             default => [],
         };
@@ -54,6 +55,9 @@ class SettingsService
         abort_unless(isset(self::DEFAULTS[$section]), 404);
         abort_unless($manager->fresh()?->isManager(), 403);
         abort_if($section === 'system', 409, 'Use the protected maintenance action to change system status.');
+        if ($section === 'backup' && filter_var($values['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+            abort_unless(app(DiagnosticsService::class)->scheduler()['verified'], 422, 'Install and verify the local scheduler before enabling automatic backups.');
+        }
         $rules = $this->rules($section);
         $validated = Validator::make(['values' => $values], ['values' => ['required', 'array:'.implode(',', array_keys(self::DEFAULTS[$section]))], ...collect($rules)->mapWithKeys(fn ($rule, $key) => ['values.'.$key => $rule])->all()], ['values.contact.regex' => 'Enter a valid shop contact number.', 'values.methods.required' => 'Enable at least one payment method.', 'values.methods.min' => 'Enable at least one payment method.'], collect(array_keys(self::DEFAULTS[$section]))->mapWithKeys(fn ($key) => ['values.'.$key => str_replace('_', ' ', $key)])->all())->validate()['values'];
         foreach (self::DEFAULTS[$section] as $key => $default) {

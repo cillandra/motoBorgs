@@ -7,8 +7,8 @@ use App\Models\Cart;
 use App\Models\User;
 use App\Models\Variant;
 use App\Services\Audit\AuditRecorder;
+use App\Services\System\OperationGuard;
 use App\Support\Money;
-use Illuminate\Support\Facades\DB;
 
 class CartService
 {
@@ -33,7 +33,7 @@ class CartService
 
     public function mutate(User $cashier, Cart $cart, int $expectedVersion, array $changes): Cart
     {
-        return DB::transaction(function () use ($cashier, $cart, $expectedVersion, $changes): Cart {
+        return app(OperationGuard::class)->transaction(function () use ($cashier, $cart, $expectedVersion, $changes): Cart {
             $cart = Cart::whereKey($cart->id)->lockForUpdate()->firstOrFail();
             $this->editable($cashier, $cart, $expectedVersion);
             $action = $changes['action'] ?? '';
@@ -105,7 +105,7 @@ class CartService
 
     public function hold(User $cashier, Cart $cart, int $expectedVersion): Cart
     {
-        return DB::transaction(function () use ($cashier, $cart, $expectedVersion): Cart {
+        return app(OperationGuard::class)->transaction(function () use ($cashier, $cart, $expectedVersion): Cart {
             $cart = Cart::whereKey($cart->id)->lockForUpdate()->firstOrFail();
             $this->editable($cashier, $cart, $expectedVersion);
             abort_unless($cart->lines()->exists(), 422, 'Add an item before holding this cart.');
@@ -120,7 +120,7 @@ class CartService
 
     public function resume(User $cashier, Cart $cart): Cart
     {
-        return DB::transaction(function () use ($cashier, $cart): Cart {
+        return app(OperationGuard::class)->transaction(function () use ($cashier, $cart): Cart {
             $cart = Cart::whereKey($cart->id)->lockForUpdate()->firstOrFail();
             $this->owned($cashier, $cart);
             abort_unless($cart->status === 'held', 409, 'This cart has already been resumed or completed.');
@@ -136,7 +136,7 @@ class CartService
     public function cancel(User $cashier, Cart $cart, int $expectedVersion, string $reason, ?int $approvalId): void
     {
         abort_unless(mb_strlen(trim($reason)) >= 3 && mb_strlen($reason) <= 1000, 422, 'Enter a cancellation reason.');
-        DB::transaction(function () use ($cashier, $cart, $expectedVersion, $reason, $approvalId): void {
+        app(OperationGuard::class)->transaction(function () use ($cashier, $cart, $expectedVersion, $reason, $approvalId): void {
             $cart = Cart::whereKey($cart->id)->lockForUpdate()->firstOrFail();
             $this->editable($cashier, $cart, $expectedVersion);
             if ($approvalId !== null) {

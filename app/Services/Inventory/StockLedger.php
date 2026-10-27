@@ -7,9 +7,9 @@ use App\Models\User;
 use App\Models\Variant;
 use App\Services\Audit\AuditRecorder;
 use App\Services\Settings\NotificationService;
+use App\Services\System\OperationGuard;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\DB;
 
 class StockLedger
 {
@@ -21,7 +21,7 @@ class StockLedger
             abort_unless($actor?->isManager(), 403, 'Manager approval is required.');
         }
         try {
-            return DB::transaction(function () use ($variant, $delta, $type, $operationKey, $actor, $reason, $context): StockMovement {
+            return app(OperationGuard::class)->transaction(function () use ($variant, $delta, $type, $operationKey, $actor, $reason, $context): StockMovement {
                 $locked = Variant::whereKey($variant->id)->lockForUpdate()->firstOrFail();
                 $existing = StockMovement::where('operation_key', $operationKey)->first();
                 if ($existing) {
@@ -64,7 +64,7 @@ class StockLedger
         abort_unless($actor->isManager(), 403);
         abort_unless($quantity > 0 && trim($reference) !== '', 422, 'Enter a positive quantity and reference.');
 
-        return DB::transaction(function () use ($actor, $variant, $quantity, $reference, $reason, $operationKey, $date): StockMovement {
+        return app(OperationGuard::class)->transaction(function () use ($actor, $variant, $quantity, $reference, $reason, $operationKey, $date): StockMovement {
             $locked = Variant::whereKey($variant->id)->lockForUpdate()->firstOrFail();
             abort_if($locked->archived_at || $locked->product->archived_at, 409, 'Restore the product before receiving stock.');
             $context = ['reference' => trim($reference)];
@@ -81,7 +81,7 @@ class StockLedger
         abort_unless($actor->isManager(), 403);
         abort_unless($count >= 0 && $count <= 1000000, 422, 'Enter a valid whole-unit count.');
 
-        return DB::transaction(function () use ($actor, $variant, $count, $reason, $operationKey, $expectedVersion): StockMovement {
+        return app(OperationGuard::class)->transaction(function () use ($actor, $variant, $count, $reason, $operationKey, $expectedVersion): StockMovement {
             $locked = Variant::whereKey($variant->id)->lockForUpdate()->firstOrFail();
             $existing = StockMovement::where('operation_key', $operationKey)->first();
             if ($existing) {

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SettingsRequest;
+use App\Models\BackupManifest;
 use App\Services\Auth\Reauthentication;
 use App\Services\Settings\PreferenceService;
 use App\Services\Settings\SettingsService;
+use App\Services\System\DiagnosticsService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,9 +26,11 @@ class SettingsController extends Controller
             $values = $read['values'];
             $version = $read['version'];
             $diagnostics = in_array($section, ['system', 'about'], true) ? $this->diagnostics($request->user()->isManager()) : [];
+            $backupHistory = $section === 'backup' ? BackupManifest::latest('id')->limit(12)->get() : collect();
+            $scheduler = $section === 'backup' ? app(DiagnosticsService::class)->scheduler() : [];
             $sessionCount = $section === 'account' ? DB::table('sessions')->where('user_id', $request->user()->id)->count() : 0;
 
-            return view('settings.index', compact('section', 'categories', 'values', 'version', 'diagnostics', 'sessionCount'));
+            return view('settings.index', compact('section', 'categories', 'values', 'version', 'diagnostics', 'sessionCount', 'backupHistory', 'scheduler'));
         } catch (QueryException $error) {
             report($error);
 
@@ -36,22 +40,7 @@ class SettingsController extends Controller
 
     private function diagnostics(bool $manager): array
     {
-        $facts = ['Application' => 'MOTO · School demonstration', 'PHP' => PHP_VERSION, 'Laravel' => app()->version(), 'Business timezone' => 'Asia/Manila', 'Branch scope' => 'One branch', 'Payments' => 'Records with manual verification', 'Tax' => 'Unconfigured · academic receipt'];
-        if ($manager) {
-            try {
-                DB::select('SELECT 1');
-                $facts['Database'] = 'Available';
-            } catch (\Throwable) {
-                $facts['Database'] = 'Unavailable';
-            }
-            $facts['Image processing'] = extension_loaded('gd') ? 'Available' : 'Unavailable';
-            $facts['Private storage'] = is_writable(storage_path('app/private')) ? 'Writable' : 'Unavailable';
-            $free = disk_free_space(storage_path());
-            $facts['Free disk space'] = $free === false ? 'Unavailable' : number_format($free / 1073741824, 1).' GB';
-            $facts['Measured at'] = now()->timezone('Asia/Manila')->format('d M Y, H:i:s');
-        }
-
-        return $facts;
+        return app(DiagnosticsService::class)->facts($manager);
     }
 
     public function update(SettingsRequest $request, string $section, SettingsService $settings, Reauthentication $reauthentication): mixed

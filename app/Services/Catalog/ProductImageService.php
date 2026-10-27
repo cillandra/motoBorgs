@@ -4,6 +4,7 @@ namespace App\Services\Catalog;
 
 use App\Models\Product;
 use App\Models\Setting;
+use App\Services\System\OperationGuard;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,11 @@ use Throwable;
 class ProductImageService
 {
     public function replace(Product $product, UploadedFile $file): string
+    {
+        return app(OperationGuard::class)->write(fn () => $this->replaceGuarded($product, $file));
+    }
+
+    private function replaceGuarded(Product $product, UploadedFile $file): string
     {
         $maximum = max(1, min(5, (int) (Setting::where('section', 'inventory')->first()?->value['max_image_mb'] ?? 5)));
         $mime = $file->getMimeType();
@@ -42,7 +48,7 @@ class ProductImageService
             throw new RuntimeException('The product image could not be saved.');
         }
         try {
-            DB::transaction(function () use ($product, $path, $old): void {
+            app(OperationGuard::class)->transaction(function () use ($product, $path, $old): void {
                 $product->update(['image_path' => $path]);
                 if ($old && $old !== $path) {
                     DB::afterCommit(fn () => Storage::disk('local')->delete($old));

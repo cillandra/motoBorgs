@@ -3,9 +3,11 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\PreferenceController;
@@ -83,4 +85,14 @@ Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): vo
         Route::get('/settings/receipt-preview', [SettingsController::class, 'receiptPreview'])->name('settings.receipt-preview');
         Route::put('/settings/{section}', [SettingsController::class, 'update'])->name('settings.update');
     });
+});
+
+Route::middleware(['auth', 'active', 'session.lifetime', 'manager'])->group(function (): void {
+    Route::get('/backups/create', [BackupController::class, 'create'])->name('backups.create');
+    Route::post('/backups', [BackupController::class, 'store'])->name('backups.store');
+    Route::get('/backups/{backup}', [BackupController::class, 'show'])->whereNumber('backup')->name('backups.show');
+    Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->whereNumber('backup')->name('backups.download');
+    Route::post('/backups/{backup}/restore', [BackupController::class, 'restore'])->whereNumber('backup')->middleware('throttle:5,15')->name('backups.restore');
+    Route::get('/maintenance', [MaintenanceController::class, 'edit'])->name('maintenance.edit');
+    Route::post('/maintenance', [MaintenanceController::class, 'update'])->middleware('throttle:5,15')->name('maintenance.update');
 });
