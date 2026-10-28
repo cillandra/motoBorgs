@@ -147,3 +147,74 @@ table td>a:not(.button):hover{text-decoration:underline}
 @media(max-width:900px){.inventory-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.inventory-filters .field:first-child{grid-column:1/-1}.inventory-filters>.clear-filters{justify-self:start}.stock-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.page-heading h1{font-size:24px;line-height:32px}.page-heading h1::before{width:24px;height:24px}}
 @media(max-width:600px){.report-kpis,.sales-summary,.stock-metrics{grid-template-columns:1fr}.page-heading{flex-wrap:wrap}.page-heading>.action-row{flex-wrap:wrap}.inventory-filters{grid-template-columns:1fr}.section-heading{font-size:16px;line-height:24px}.metric-card .metric-value{font-size:28px;line-height:36px}}
 @media print{.page-heading h1::before,.ui-heading-icon,.kpi-icon,.modal>header>div::before{display:none!important}.section-heading{display:block}.metric-card,.report-kpis .metric-card,.sales-summary .metric-card{background:#fff!important;border-color:#bbb!important}.metric-card :is(.metric-label,.metric-value,.metric-context){color:#111!important}.ui-status{background:#fff!important;color:#111!important;border-color:#777!important}}
+
+.stack,.table-scroll{min-width:0}
+.table-scroll{max-width:100%;overscroll-behavior-x:contain}
+.table-scroll .numeric{white-space:nowrap}
+.table-scroll td>.action-row{flex-wrap:nowrap;gap:4px}
+.table-scroll td .button{min-height:36px;padding:6px 10px;white-space:nowrap}
+.modal>header>.icon-button{flex-shrink:0}
+@media screen and (min-width:801px) and (max-width:1100px){
+    .sales-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .metric-card .metric-value{font-size:28px;line-height:36px}
+    .metric-card,.sales-summary .metric-card{padding:16px;min-height:144px}
+}
+@media screen and (max-width:800px){
+    .main-workspace{margin-left:80px}
+    .sidebar{overflow-y:auto;overscroll-behavior-y:contain}
+    .main-navigation,.sidebar-bottom{flex-shrink:0}
+    .page-content{padding:20px}
+    .sales-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .sales-summary>.metric-card:last-child{grid-column:1/-1}
+    .page-heading{align-items:flex-start;flex-wrap:wrap}
+    .inventory-tabs{height:auto;flex-wrap:wrap;gap:12px}
+    .inventory-tabs>.view-switch{margin-left:auto}
+    .tabs{max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-x:contain}
+    .tabs>.tab{flex-shrink:0}
+    .form-actions{align-items:stretch;flex-direction:column;gap:12px}
+    .form-actions>.action-row{justify-content:flex-end}
+    .workspace-modal .product-form,.workspace-modal .stock-form{padding:16px}
+    .workspace-modal :is(.identity-workspace,.return-workspace){gap:16px}
+    .workspace-modal :is(.identity-workspace,.return-workspace) .panel{padding:16px}
+}
+@media screen and (max-width:600px){
+    .topbar{padding:8px 12px;gap:8px}
+    .topbar>h2{min-width:0;font-size:16px;line-height:22px;overflow-wrap:anywhere}
+    .topbar>.icon-button,.topbar>.profile-menu{flex-shrink:0}
+    .topbar .profile-menu{margin-left:0}
+    .topbar .profile-identity{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+    .topbar .profile-menu>summary{width:auto;gap:6px}
+    .page-content{padding:16px}
+    .page-heading{gap:12px;margin-bottom:20px}
+    .page-heading h1{font-size:22px;line-height:30px;gap:8px}
+    .page-heading h1::before{width:22px;height:22px}
+    .page-heading p{font-size:13px;line-height:20px}
+    .sales-summary{grid-template-columns:1fr}
+    .sales-summary>.metric-card:last-child{grid-column:auto}
+    .metric-card .metric-value{font-size:26px;line-height:34px}
+    :is(.sales-filters,.identity-filters,.report-filters)>.field{flex:1 1 100%;min-width:0}
+    :is(.sales-filters,.identity-filters,.report-filters)>.action-row{width:100%;padding-bottom:0}
+    .inventory-grid{grid-template-columns:minmax(0,1fr)}
+    .pos-result-row{align-items:flex-start;flex-wrap:wrap}
+    .pos-result-row small{display:block;margin-left:0}
+    .pos-products{padding:4px;gap:12px}
+    .pos-catalog{gap:12px}
+    .pos-columns{gap:20px;min-height:0}
+    .current-order{min-height:500px;padding:12px}
+    .pos-order-actions>.button,.pos-order-actions>form{flex:1 1 100px}
+    .button{white-space:normal;text-align:center;overflow-wrap:anywhere}
+    .modal{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:16px}
+    .pos-page .modal,.workspace-modal .modal{width:calc(100vw - 24px)}
+    .modal>header{gap:12px;margin-bottom:16px}
+    .modal>header h2{font-size:18px;line-height:26px}
+    .modal .action-row>.button,.modal .form-actions .action-row>*{flex:1 1 120px}
+    .modal .action-row{gap:8px}
+    .workspace-modal .page-heading .action-row{width:100%}
+    .table-scroll :is(th,td){padding:10px 12px}
+    .table-scroll :is(th:first-child,td:first-child){min-width:160px}
+    .pagination{align-items:flex-start;gap:12px;flex-wrap:wrap}
+    .pagination>div{flex-wrap:wrap}
+    .variant-option{align-items:stretch;flex-direction:column;gap:12px}
+    .variant-option .button{width:100%}
+    .setting-toggle-row{flex-wrap:wrap}
+}

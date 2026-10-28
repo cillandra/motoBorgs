@@ -1,7 +1,7 @@
 @foreach(['discount'=>'Discount approval','void'=>'Void unpaid cart'] as $kind=>$title)
 <x-dialog id="{{ $kind }}-approval" :title="$title"><form action="{{ route('pos.approval',$cart) }}" method="post" class="stack" data-pos-form>@csrf<input type="hidden" name="version" value="{{ $cart->version }}"><input type="hidden" name="action" value="{{ $kind==='discount'?'discount':'cancel_exception' }}">
 <p>{{ auth()->user()->name }} · CART-{{ $cart->id }} · Version {{ $cart->version }}</p><p>Manager authorization is required. The cashier stays signed in.</p>
-@if($kind==='discount')<x-input id="discount-amount" name="discount" label="Discount amount (PHP)" inputmode="decimal" required pattern="\d+(\.\d{1,2})?" /><p>Maximum {{ $discountCap }}%: ₱{{ \App\Support\Money::format(intdiv($quote['subtotal'] * $discountCap,100)) }}. Approval expires after five minutes and is invalidated by cart changes.</p>@endif
+@if($kind==='discount')<x-input id="discount-amount" name="discount" label="Discount amount (PHP)" inputmode="decimal" required pattern="\d+(\.\d{1,2})?" /><p>Maximum {{ $discountCap }}%: ₱{{ \App\Support\Money::display(intdiv($quote['subtotal'] * $discountCap,100)) }}. Approval expires after five minutes and is invalidated by cart changes.</p>@endif
 <div class="field"><label for="{{ $kind }}-reason">Reason *</label><div class="field-perimeter"><textarea id="{{ $kind }}-reason" name="reason" required minlength="3" maxlength="1000"></textarea></div></div>
 <x-input id="{{ $kind }}-manager" name="manager_username" label="Manager username" autocomplete="off" required maxlength="80" />
 <x-input id="{{ $kind }}-password" name="manager_password" label="Manager password" type="password" autocomplete="off" required maxlength="1024" />

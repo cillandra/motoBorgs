@@ -16,6 +16,15 @@ class MoneyTest extends TestCase
         $this->assertSame('100.01', Money::format(10001));
     }
 
+    public function test_display_groups_thousands_without_changing_decimal_input_format(): void
+    {
+        foreach ([0 => '0.00', 99999 => '999.99', 100001 => '1,000.01', 1807800 => '18,078.00', -1807800 => '-18,078.00', 999999999 => '9,999,999.99'] as $centavos => $expected) {
+            $this->assertSame($expected, Money::display($centavos));
+        }
+        $this->assertSame('18078.00', Money::format(1807800));
+        $this->assertSame(1807800, Money::parse(Money::format(1807800)));
+    }
+
     public function test_fractional_centavo_is_rejected(): void
     {
         $this->expectException(InvalidArgumentException::class);

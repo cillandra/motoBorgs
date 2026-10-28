@@ -26,6 +26,11 @@ final class Money
         return ($centavos < 0 ? '-' : '').intdiv(abs($centavos), 100).'.'.str_pad((string) (abs($centavos) % 100), 2, '0', STR_PAD_LEFT);
     }
 
+    public static function display(int $centavos): string
+    {
+        return preg_replace('/\B(?=(\d{3})+\.)/', ',', self::format($centavos));
+    }
+
     /** @param array<int, int> $lineGross @return array<int, int> */
     public static function allocate(int $discount, array $lineGross): array
     {

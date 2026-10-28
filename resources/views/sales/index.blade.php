@@ -7,9 +7,9 @@
 <section class="panel stack" role="alert"><h2>Data unavailable</h2><p>Sales could not be loaded. Your selected filters are preserved.</p><a class="button button-secondary" href="{{ route('sales.index',$filters) }}">Retry</a></section>
 @else
 <section class="sales-summary" aria-label="Filtered sale totals">
-<x-metric-card :label="'Sales recorded · '.$summary['count'].' transactions'" :value="'₱'.\App\Support\Money::format($summary['recorded'])" icon="reports" tone="info" />
-<x-metric-card label="Paid refunds linked to these sales" :value="'₱'.\App\Support\Money::format($summary['refunded'])" icon="receipt" tone="danger" />
-<x-metric-card label="Net sales · selected sale records" :value="'₱'.\App\Support\Money::format($summary['net'])" icon="receipt" tone="success" />
+<x-metric-card :label="'Sales recorded · '.$summary['count'].' transactions'" :value="'₱'.\App\Support\Money::display($summary['recorded'])" icon="reports" tone="info" />
+<x-metric-card label="Paid refunds linked to these sales" :value="'₱'.\App\Support\Money::display($summary['refunded'])" icon="receipt" tone="danger" />
+<x-metric-card label="Net sales · selected sale records" :value="'₱'.\App\Support\Money::display($summary['net'])" icon="receipt" tone="success" />
 </section>
 @endif
 <form class="sales-filters" method="get" action="{{ route('sales.index') }}">
@@ -24,7 +24,7 @@
 @if($errors->any())<div class="inline-alert error" role="alert">{{ $errors->first() }}</div>@endif
 @if(isset($sales))
 <section class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Transaction</th><th>Date and time · Manila</th>@if(auth()->user()->isManager())<th>Cashier</th>@endif<th>Payment</th><th class="numeric">Total paid</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-@forelse($sales as $sale)<tr><td><strong>MOTO-{{ str_pad($sale->id,8,'0',STR_PAD_LEFT) }}</strong><small>{{ $sale->lines->pluck('sku')->join(', ') }}</small></td><td>{{ $sale->created_at->timezone('Asia/Manila')->format('d M Y, H:i') }}</td>@if(auth()->user()->isManager())<td>{{ $sale->cashier_name }}</td>@endif<td>{{ ['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'][$sale->payment->method] }}</td><td class="numeric">₱{{ \App\Support\Money::format($sale->total_centavos) }}</td><td><x-status-badge :status="($sale->paid_refunds_centavos??0)>0?($sale->paid_refunds_centavos>=$sale->total_centavos?'Refunded':'Partially refunded'):'Completed'" /></td><td><div class="action-row"><a data-modal-link class="button button-ghost" href="{{ route('sales.show',$sale) }}">View</a><a data-modal-link class="button button-ghost" href="{{ route('sales.receipt',[$sale,'copy'=>1]) }}">Receipt</a></div></td></tr>@empty<tr><td colspan="7"><x-empty-state title="No matching sales" message="Try another search or clear your filters." /></td></tr>@endforelse
+@forelse($sales as $sale)<tr><td><strong>MOTO-{{ str_pad($sale->id,8,'0',STR_PAD_LEFT) }}</strong><small>{{ $sale->lines->pluck('sku')->join(', ') }}</small></td><td>{{ $sale->created_at->timezone('Asia/Manila')->format('d M Y, H:i') }}</td>@if(auth()->user()->isManager())<td>{{ $sale->cashier_name }}</td>@endif<td>{{ ['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'][$sale->payment->method] }}</td><td class="numeric">₱{{ \App\Support\Money::display($sale->total_centavos) }}</td><td><x-status-badge :status="($sale->paid_refunds_centavos??0)>0?($sale->paid_refunds_centavos>=$sale->total_centavos?'Refunded':'Partially refunded'):'Completed'" /></td><td><div class="action-row"><a data-modal-link class="button button-ghost" href="{{ route('sales.show',$sale) }}">View</a><a data-modal-link class="button button-ghost" href="{{ route('sales.receipt',[$sale,'copy'=>1]) }}">Receipt</a></div></td></tr>@empty<tr><td colspan="7"><x-empty-state title="No matching sales" message="Try another search or clear your filters." /></td></tr>@endforelse
 </tbody></table></div>{{ $sales->links('components.pagination') }}</section>
 <p class="measure-note">This history summarizes sales by sale date, with all paid refunds linked to those records. Date-based reports account for refunds on their payout dates. Held and cancelled carts are excluded.</p>
 @endif

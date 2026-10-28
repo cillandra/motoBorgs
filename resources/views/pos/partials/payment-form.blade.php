@@ -1,6 +1,6 @@
 @php($enabledMethods=\App\Models\Setting::where('section','sales')->first()?->value['methods']??['cash','gcash','qrph','debit','credit'])
 <form method="post" action="{{ route('checkout.store',$cart) }}" class="stack payment-form" data-checkout-form data-status-url="{{ route('checkout.status',['key'=>'ATTEMPT']) }}" data-user="{{ auth()->id() }}" data-cart="{{ $cart->id }}" data-total="{{ $quote['total'] }}">@csrf<input type="hidden" name="version" value="{{ $cart->version }}"><input type="hidden" name="request_key" value="{{ \Illuminate\Support\Str::uuid() }}">
-<div class="payment-due"><strong>Amount due</strong><strong>₱{{ \App\Support\Money::format($quote['total']) }}</strong></div>
+<div class="payment-due"><strong>Amount due</strong><strong>₱{{ \App\Support\Money::display($quote['total']) }}</strong></div>
 <fieldset class="payment-methods"><legend class="sr-only">Payment method</legend>@foreach(['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'] as $method=>$label)<label><input type="radio" name="method" value="{{ $method }}" @checked($method===($enabledMethods[0]??'')) @disabled(!in_array($method,$enabledMethods,true))>{{ $label }}</label>@endforeach</fieldset>
 <x-input id="payment-received" name="received" label="Amount received (PHP)" placeholder="Enter amount received" required inputmode="decimal" pattern="\d+(\.\d{1,2})?" />
 <div class="payment-due" data-change-row><span>Change</span><output data-change>—</output></div>

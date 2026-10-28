@@ -1,3 +1,5 @@
+import { formatCurrency } from './money.js';
+
 const checkoutInitialized = new WeakSet();
 function initializeCheckout(root = document) {
 let form = root.querySelector('[data-checkout-form]');
@@ -37,7 +39,7 @@ if (form) {
         const [whole, part = ''] = value.split('.');
         return Number(whole) * 100 + Number(part.padEnd(2, '0'));
     };
-    const currency = (value) => '₱' + (value / 100).toFixed(2);
+    const currency = formatCurrency;
     function updatePayment() {
         const cash = form.elements.method.value === 'cash';
         form.querySelector('[data-external-fields]').hidden = cash;

@@ -1,3 +1,5 @@
+import { formatCurrency } from './money.js';
+
 const returnsInitialized = new WeakSet();
 function initializeReturns(root = document) {
     root.querySelectorAll('[data-return-request-form]').forEach((form) => {
@@ -14,7 +16,7 @@ function initializeReturns(root = document) {
                 units += quantity;
             });
             form.querySelector('[data-return-units]').textContent = String(units);
-            form.querySelector('[data-return-estimate]').textContent = valid && units > 0 ? '₱' + (amount / 100).toFixed(2) : '—';
+            form.querySelector('[data-return-estimate]').textContent = valid && units > 0 ? formatCurrency(amount) : '—';
             form.querySelector('[data-return-submit]').disabled = !valid || units === 0;
         };
         form.addEventListener('input', update);

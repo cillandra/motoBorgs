@@ -11,7 +11,7 @@
 @php
     $prefix=auth()->user()->isManager()?'':'My ';
     $metrics=[
-        [$prefix.'net sales','₱'.\App\Support\Money::format($data['net_sales']),'Completed sales less paid refunds','receipt','sales'],
+        [$prefix.'net sales','₱'.\App\Support\Money::display($data['net_sales']),'Completed sales less paid refunds','receipt','sales'],
         [$prefix.'completed sales',$data['completed_count'],'Selected business date','reports','completed'],
         [$prefix.'units sold',$data['net_units'],'Less units accepted as returns','inventory','units'],
         [auth()->user()->isManager()?'Stock alerts':'My held carts',auth()->user()->isManager()?$data['stock_alerts']['count']:$data['held_count'],auth()->user()->isManager()?($data['stock_alerts']['count']-$data['stock_alerts']['out']).' low · '.$data['stock_alerts']['out'].' out of stock':'Unpaid · stock not reserved',auth()->user()->isManager()?'activity':'cart','attention'],
@@ -32,7 +32,7 @@
             $maximum=max(1,$hours->max(fn($hour)=>abs($hour['sales_centavos'])));
         @endphp
         <div class="hourly-chart" role="img" aria-label="Hourly net sales. Exact amounts are shown for each hour.">
-            @foreach($hours as $hour)<div class="hour-column"><div class="hour-plot"><span class="hour-value">₱{{ \App\Support\Money::format($hour['sales_centavos']) }}</span><span @class(['hour-bar','negative'=>$hour['sales_centavos']<0,'latest'=>$loop->last]) style="height:{{ round(abs($hour['sales_centavos'])/$maximum*112,2) }}px"></span></div><span>{{ str_pad($hour['hour'],2,'0',STR_PAD_LEFT) }}:00</span></div>@endforeach
+            @foreach($hours as $hour)<div class="hour-column"><div class="hour-plot"><span class="hour-value">₱{{ \App\Support\Money::display($hour['sales_centavos']) }}</span><span @class(['hour-bar','negative'=>$hour['sales_centavos']<0,'latest'=>$loop->last]) style="height:{{ round(abs($hour['sales_centavos'])/$maximum*112,2) }}px"></span></div><span>{{ str_pad($hour['hour'],2,'0',STR_PAD_LEFT) }}:00</span></div>@endforeach
         </div><p class="measure-note">Paid refunds may create negative hours. Returns affect units on their acceptance date.</p>
     </section>
     <section class="panel dashboard-panel dashboard-panel--attention" aria-labelledby="stock-attention-title">
@@ -61,7 +61,7 @@
     </section>
     <section class="panel dashboard-panel">
         <header><h2>{{ auth()->user()->isManager()?'Recent transactions':'My recent transactions' }}</h2><a class="button button-ghost" href="{{ route('sales.index',['start'=>$date,'end'=>$date]) }}">View history</a></header>
-        <div class="table-scroll"><table><thead><tr><th>Transaction</th><th>Time</th>@if(auth()->user()->isManager())<th>Cashier</th>@endif<th>Payment</th><th class="numeric">Total</th><th>Status</th></tr></thead><tbody>@forelse($data['recent_sales'] as $sale)<tr><td><a data-modal-link href="{{ route('sales.show',$sale) }}">MOTO-{{ str_pad($sale->id,8,'0',STR_PAD_LEFT) }}</a></td><td>{{ $sale->created_at->timezone('Asia/Manila')->format('H:i') }}</td>@if(auth()->user()->isManager())<td>{{ $sale->cashier_name }}</td>@endif<td>{{ ['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'][$sale->payment->method] }}</td><td class="numeric">₱{{ \App\Support\Money::format($sale->total_centavos) }}</td><td><x-status-badge :status="($sale->paid_refunds_centavos??0)>0?($sale->paid_refunds_centavos>=$sale->total_centavos?'Refunded':'Partially refunded'):'Completed'" /></td></tr>@empty<tr><td colspan="6">No completed sales on this date.</td></tr>@endforelse</tbody></table></div>
+        <div class="table-scroll"><table><thead><tr><th>Transaction</th><th>Time</th>@if(auth()->user()->isManager())<th>Cashier</th>@endif<th>Payment</th><th class="numeric">Total</th><th>Status</th></tr></thead><tbody>@forelse($data['recent_sales'] as $sale)<tr><td><a data-modal-link href="{{ route('sales.show',$sale) }}">MOTO-{{ str_pad($sale->id,8,'0',STR_PAD_LEFT) }}</a></td><td>{{ $sale->created_at->timezone('Asia/Manila')->format('H:i') }}</td>@if(auth()->user()->isManager())<td>{{ $sale->cashier_name }}</td>@endif<td>{{ ['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'][$sale->payment->method] }}</td><td class="numeric">₱{{ \App\Support\Money::display($sale->total_centavos) }}</td><td><x-status-badge :status="($sale->paid_refunds_centavos??0)>0?($sale->paid_refunds_centavos>=$sale->total_centavos?'Refunded':'Partially refunded'):'Completed'" /></td></tr>@empty<tr><td colspan="6">No completed sales on this date.</td></tr>@endforelse</tbody></table></div>
     </section>
     <section class="panel dashboard-panel dashboard-panel--activity" aria-labelledby="dashboard-activity-title">
         <header class="dashboard-section-header">
