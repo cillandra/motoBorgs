@@ -71,25 +71,36 @@ table :is(.numeric,time){font-variant-numeric:tabular-nums}
 tbody tr:has(a):hover{background:var(--ui-hover)}
 table td>a:not(.button){font-weight:600;color:var(--ui-info-accent);text-underline-offset:3px}
 table td>a:not(.button):hover{text-decoration:underline}
-.product-card,.pos-product{border-color:var(--stock-border,var(--border));transition:border-color .16s ease-out}
-.product-card{display:flex;flex-direction:column}
-.product-card-details{height:auto;min-height:208px;flex:1}
-.product-card h2{overflow-wrap:anywhere}
-.product-card footer{margin-top:auto}
+.product-card,.pos-product{border-color:var(--border);transition:border-color .16s ease-out;display:flex;flex-direction:column}
+.product-card-details,.pos-product-info{height:auto;min-height:auto;flex:1 0 auto;display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:16px;gap:16px}
+.product-card h2,.pos-product h2{display:block;min-height:48px;max-width:100%;font-size:16px;line-height:24px;font-weight:600;overflow-wrap:anywhere}
+.product-card-copy{display:flex;flex-direction:column;gap:4px}
+.product-card-copy p{font-size:12px;line-height:18px;color:var(--muted);overflow-wrap:anywhere}
+.product-card-copy .compatibility{overflow:visible;white-space:normal}
+.product-card-summary{display:flex;flex-direction:column;gap:12px;margin-top:auto}
+.product-card-summary :is(.product-price,.pos-price){font-size:18px;line-height:26px}
+.product-card>footer,.pos-product-action{height:auto;margin-top:auto;padding:0 16px 16px;background:transparent}
+.product-card>footer .button,.pos-product-action .button{width:100%;min-height:40px;padding:8px 12px;margin:0}
+.pos-product .product-media{height:104px;min-height:104px;flex-shrink:0}
+.pos-products{grid-auto-rows:max-content}
+.pos-product-action{flex-shrink:0}
+.inventory-grid{align-items:stretch}
+.add-product-tile{height:auto;min-height:366px}
 [data-stock=in]{--stock-bg:var(--ui-success-bg);--stock-accent:var(--ui-success-accent);--stock-copy:var(--ui-success-copy);--stock-border:var(--ui-success-border)}
 [data-stock=low]{--stock-bg:var(--ui-warning-bg);--stock-accent:var(--ui-warning-accent);--stock-copy:var(--ui-warning-copy);--stock-border:var(--ui-warning-border)}
 [data-stock=out]{--stock-bg:var(--ui-danger-bg);--stock-accent:var(--ui-danger-accent);--stock-copy:var(--ui-danger-copy);--stock-border:var(--ui-danger-border)}
 [data-stock=archived],[data-stock=mixed]{--stock-bg:var(--ui-neutral-bg);--stock-accent:var(--ui-neutral-accent);--stock-copy:var(--ui-neutral-copy);--stock-border:var(--ui-neutral-border)}
-:is(.product-card,.pos-product):hover{border-color:var(--stock-accent,var(--border-control))}
-.product-card .stock-indicator,.pos-product .pos-availability{padding:5px 8px;border-radius:7px;background:var(--stock-bg);color:var(--stock-copy);gap:8px;max-width:100%}
-.product-card .stock-indicator>.caption{color:var(--stock-copy)}
+:is(.product-card,.pos-product):hover{border-color:var(--border-control)}
+.product-card .stock-indicator,.pos-product .pos-availability{height:auto;min-height:26px;padding:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;max-width:100%;color:var(--muted)}
+.product-card .stock-indicator>.caption,.pos-availability>span{font-size:12px;line-height:18px;color:var(--muted)}
+.product-card-summary>.status-badge{align-self:flex-start;white-space:normal}
 .product-price,.pos-price,.detail-price{color:var(--ui-success-accent);font-variant-numeric:tabular-nums}
-.current-order{border-color:var(--ui-success-border)}
+.current-order,.pos-cart-line{border-color:var(--border)}
 .current-order>header{padding-bottom:14px;border-bottom:1px solid var(--border)}
 .current-order .section-heading{font-size:20px;line-height:28px}
-.order-summary{background:var(--ui-success-bg);border-color:var(--ui-success-border)}
+.order-summary{background:var(--ui-success-bg);border-color:var(--border)}
 .order-summary>div{color:var(--ui-success-copy)}
-.order-summary .order-total{color:var(--ui-success-accent);border-color:var(--ui-success-border)}
+.order-summary .order-total{color:var(--ui-success-accent);border-color:var(--border)}
 .order-total>strong:last-child{font-size:24px;line-height:32px;font-variant-numeric:tabular-nums}
 .return-summary>div[data-tone]{padding:9px 0;border-bottom:1px solid var(--border)}
 .return-summary>div[data-tone]>strong{color:var(--tone-accent);font-size:18px;line-height:26px;font-variant-numeric:tabular-nums}
