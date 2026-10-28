@@ -10,8 +10,8 @@
     $paid=(int)$return->refunds->where('status','paid')->sum('amount_centavos');
     $eligible=(int)$return->lines->sum('refundable_centavos');
 @endphp
-<article class="panel return-request-card">
-<header><h2>RET-{{ str_pad($return->id,6,'0',STR_PAD_LEFT) }} · MOTO-{{ str_pad($return->sale_id,8,'0',STR_PAD_LEFT) }}</h2><span class="return-status return-status-{{ $return->status }}">{{ ['pending'=>'Pending','accepted'=>'Approved','rejected'=>'Rejected'][$return->status] }}</span></header>
+<article class="panel return-request-card" data-return-state="{{ $return->status }}">
+<header><h2>RET-{{ str_pad($return->id,6,'0',STR_PAD_LEFT) }} · MOTO-{{ str_pad($return->sale_id,8,'0',STR_PAD_LEFT) }}</h2><x-status-badge :status="$return->status" :label="['pending'=>'Pending','accepted'=>'Approved','rejected'=>'Rejected'][$return->status]" /></header>
 <dl>
 <div><dt>Requested by</dt><dd>{{ $return->requester->name }} · {{ $return->created_at->timezone('Asia/Manila')->format('d M Y, H:i') }}</dd></div>
 <div><dt>Item / refund</dt><dd>@foreach($return->lines as $line)
@@ -25,7 +25,7 @@
 <div><dt>Reason</dt><dd>{{ $return->reason }}</dd></div>
 <div><dt>Condition</dt><dd>{{ $return->status==='pending'?'Awaiting inspection':($return->status==='rejected'?'Not accepted':$return->lines->map(fn($line)=>ucfirst($line->condition))->unique()->join(', ')) }}</dd></div>
 </dl>
-<div class="information-notice"><img src="{{ asset('assets/icons/info.svg') }}" width="20" height="20" alt=""><div><strong>{{ ['pending'=>'Awaiting Manager decision','accepted'=>'Return approved','rejected'=>'Request rejected'][$return->status] }}</strong><p>{{ $return->status==='pending'?'No refund or stock change has been applied.':($return->status==='rejected'?$return->review_reason:'Eligible refund: ₱'.\App\Support\Money::format($eligible).' · Recorded paid: ₱'.\App\Support\Money::format($paid).'. Stock reflects sellable units only.') }}</p></div></div>
+<div class="information-notice" data-tone="{{ ['pending'=>'warning','accepted'=>'success','rejected'=>'danger'][$return->status] }}"><img src="{{ asset('assets/icons/info.svg') }}" width="20" height="20" alt=""><div><strong>{{ ['pending'=>'Awaiting Manager decision','accepted'=>'Return approved','rejected'=>'Request rejected'][$return->status] }}</strong><p>{{ $return->status==='pending'?'No refund or stock change has been applied.':($return->status==='rejected'?$return->review_reason:'Eligible refund: ₱'.\App\Support\Money::format($eligible).' · Recorded paid: ₱'.\App\Support\Money::format($paid).'. Stock reflects sellable units only.') }}</p></div></div>
 <footer><a data-modal-link class="button {{ $return->status==='pending' && auth()->user()->isManager()?'button-primary':'button-secondary' }}" href="{{ route('returns.show',$return) }}">{{ $return->status==='pending' && auth()->user()->isManager()?'Review request':'View request' }}</a></footer>
 </article>
 @empty

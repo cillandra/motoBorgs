@@ -19,11 +19,7 @@
 @endphp
 <section class="dashboard-kpis" aria-label="Business date totals">
     @foreach($metrics as [$label,$value,$context,$icon,$tone])
-    <div class="panel dashboard-kpi" data-metric="{{ $tone }}">
-        <div class="metric-heading"><span class="metric-label">{{ ucfirst($label) }}</span><span class="kpi-icon" aria-hidden="true"><span class="dashboard-icon" style="--dashboard-icon:url('{{ asset('assets/icons/'.$icon.'.svg') }}')"></span></span></div>
-        <strong class="metric-value">{{ $value }}</strong>
-        <p class="metric-context">{{ $context }}</p>
-    </div>
+    <x-metric-card class="dashboard-kpi" data-metric="{{ $tone }}" :label="ucfirst($label)" :value="$value" :help="$context" :icon="$icon" :tone="['sales'=>'success','completed'=>'info','units'=>'violet','attention'=>'warning'][$tone]" />
     @endforeach
 </section>
 <div class="dashboard-columns">
@@ -65,7 +61,7 @@
     </section>
     <section class="panel dashboard-panel">
         <header><h2>{{ auth()->user()->isManager()?'Recent transactions':'My recent transactions' }}</h2><a class="button button-ghost" href="{{ route('sales.index',['start'=>$date,'end'=>$date]) }}">View history</a></header>
-        <div class="table-scroll"><table><thead><tr><th>Transaction</th><th>Time</th>@if(auth()->user()->isManager())<th>Cashier</th>@endif<th>Payment</th><th class="numeric">Total</th><th>Status</th></tr></thead><tbody>@forelse($data['recent_sales'] as $sale)<tr><td><a data-modal-link href="{{ route('sales.show',$sale) }}">MOTO-{{ str_pad($sale->id,8,'0',STR_PAD_LEFT) }}</a></td><td>{{ $sale->created_at->timezone('Asia/Manila')->format('H:i') }}</td>@if(auth()->user()->isManager())<td>{{ $sale->cashier_name }}</td>@endif<td>{{ ['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'][$sale->payment->method] }}</td><td class="numeric">₱{{ \App\Support\Money::format($sale->total_centavos) }}</td><td><span class="status-badge">{{ ($sale->paid_refunds_centavos??0)>0?($sale->paid_refunds_centavos>=$sale->total_centavos?'Refunded':'Partially refunded'):'Completed' }}</span></td></tr>@empty<tr><td colspan="6">No completed sales on this date.</td></tr>@endforelse</tbody></table></div>
+        <div class="table-scroll"><table><thead><tr><th>Transaction</th><th>Time</th>@if(auth()->user()->isManager())<th>Cashier</th>@endif<th>Payment</th><th class="numeric">Total</th><th>Status</th></tr></thead><tbody>@forelse($data['recent_sales'] as $sale)<tr><td><a data-modal-link href="{{ route('sales.show',$sale) }}">MOTO-{{ str_pad($sale->id,8,'0',STR_PAD_LEFT) }}</a></td><td>{{ $sale->created_at->timezone('Asia/Manila')->format('H:i') }}</td>@if(auth()->user()->isManager())<td>{{ $sale->cashier_name }}</td>@endif<td>{{ ['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'][$sale->payment->method] }}</td><td class="numeric">₱{{ \App\Support\Money::format($sale->total_centavos) }}</td><td><x-status-badge :status="($sale->paid_refunds_centavos??0)>0?($sale->paid_refunds_centavos>=$sale->total_centavos?'Refunded':'Partially refunded'):'Completed'" /></td></tr>@empty<tr><td colspan="6">No completed sales on this date.</td></tr>@endforelse</tbody></table></div>
     </section>
     <section class="panel dashboard-panel dashboard-panel--activity" aria-labelledby="dashboard-activity-title">
         <header class="dashboard-section-header">

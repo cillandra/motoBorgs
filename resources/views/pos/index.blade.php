@@ -20,7 +20,7 @@
 <div class="pos-products">
 @forelse($variants->groupBy('product_id') as $group)
 @php($variant=$group->first())
-<article class="pos-product">
+<article class="pos-product" data-stock="{{ $group->count()>1?'mixed':($variant->stock===0?'out':($variant->stock<=$variant->threshold?'low':'in')) }}">
 <div class="product-media">@if($variant->product->image_path)<img class="product-photo" src="{{ route('products.image',$variant->product) }}" alt="{{ $variant->product->name }}">@else<img src="{{ asset('assets/icons/image-unavailable.svg') }}" alt=""><span>Image unavailable</span>@endif</div>
 <div class="pos-product-info"><strong>{{ $variant->product->name }}</strong><p>{{ $group->count()>1 ? $group->count().' variants' : 'SKU: '.$variant->sku }}</p><p>{{ $group->count()>1 ? 'Choose exact model / size' : $variant->name.' · sold per '.$variant->unit->code }}</p><p>{{ $variant->product->compatibility ?: 'Verify fitment before sale' }}</p><strong class="pos-price">{{ $group->count()>1?'From ':'' }}₱{{ \App\Support\Money::format($group->min('price_centavos')) }}</strong>@if($group->count()>1)<span class="status-badge">Stock varies by variant</span>@else<div class="pos-availability"><x-stock-badge :variant="$variant" /><span>{{ $variant->stock }} {{ $variant->unit->code }}</span></div>@endif</div>
 <div class="pos-product-action">
