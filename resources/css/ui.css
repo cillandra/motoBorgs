@@ -218,3 +218,8 @@ table td>a:not(.button):hover{text-decoration:underline}
     .variant-option .button{width:100%}
     .setting-toggle-row{flex-wrap:wrap}
 }
+
+.reporting-context{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:12px 16px;margin-bottom:16px;border:1px solid var(--border);border-radius:12px;background:var(--bg-card)}
+.reporting-context>div{flex:1 1 240px;min-width:0}
+.reporting-context strong{font-weight:600}
+.reporting-context p{font-size:12px;line-height:18px;color:var(--muted);margin-top:4px}

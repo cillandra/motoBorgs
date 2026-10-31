@@ -6,10 +6,12 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Variant;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class CatalogQuery
 {
-    public function search(User $actor, array $filters, int $perPage = 20): LengthAwarePaginator
+    private function matchingVariants(User $actor, array $filters): Builder
     {
         abort_unless($actor->active, 403);
         $query = Variant::query()->with(['product.category', 'unit']);
@@ -41,6 +43,13 @@ class CatalogQuery
             'in' => $query->where('stock', '>', 0),
             default => null,
         };
+
+        return $query;
+    }
+
+    public function search(User $actor, array $filters, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = $this->matchingVariants($actor, $filters);
         [$column, $direction] = match ($filters['sort'] ?? '') {
             'name_asc' => ['product_name', 'asc'],
             'name_desc' => ['product_name', 'desc'],
@@ -57,5 +66,36 @@ class CatalogQuery
         }
 
         return $query->orderBy($column, $direction)->orderBy('id')->paginate(max(1, min(100, $perPage)))->withQueryString();
+    }
+
+    /** @return array{products: LengthAwarePaginator, variant_count: int} */
+    public function forPos(User $actor, array $filters, int $perPage = 24): array
+    {
+        return DB::transaction(fn () => $this->productPage($actor, $filters, $perPage));
+    }
+
+    private function productPage(User $actor, array $filters, int $perPage): array
+    {
+        $matching = $this->matchingVariants($actor, $filters);
+        $variantIds = (clone $matching)->select('variants.id');
+        $query = Product::query()->whereIn('id', (clone $matching)->select('product_id'))->with(['variants' => function ($variants) use ($variantIds, $actor): void {
+            $variants->whereIn('variants.id', clone $variantIds)->with('unit')->orderBy('id');
+            if (! $actor->isManager()) {
+                $variants->select(['id', 'product_id', 'unit_id', 'sku', 'barcode', 'name', 'price_centavos', 'stock', 'threshold', 'archived_at', 'version']);
+            }
+        }]);
+        [$column, $direction] = match ($filters['sort'] ?? 'name_asc') {
+            'name_desc' => ['name', 'desc'],
+            'price_asc' => ['price_centavos', 'asc'], 'price_desc' => ['price_centavos', 'desc'],
+            'stock_asc' => ['stock', 'asc'], 'stock_desc' => ['stock', 'desc'],
+            'sku' => ['sku', 'asc'], default => ['name', 'asc'],
+        };
+        if ($column === 'name') {
+            $query->orderBy('name', $direction);
+        } else {
+            $query->withMin(['variants as catalog_sort' => fn ($variants) => $variants->whereIn('variants.id', clone $variantIds)], $column)->orderBy('catalog_sort', $direction);
+        }
+
+        return ['variant_count' => (clone $matching)->count(), 'products' => $query->orderBy('id')->paginate(max(1, min(100, $perPage)))->withQueryString()];
     }
 }

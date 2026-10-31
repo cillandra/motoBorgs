@@ -24,6 +24,8 @@ class InventoryController extends Controller
         $variant->load(['product.category', 'unit']);
         $siblings = $variant->product->variants()->with('unit')->when(! $request->user()->isManager(), fn ($q) => $q->whereNull('archived_at'))->get();
 
-        return view('inventory.show', compact('variant', 'siblings'));
+        $movements = $request->user()->isManager() ? $variant->movements()->with('actor')->latest()->paginate(10) : null;
+
+        return view('inventory.show', compact('variant', 'siblings', 'movements'));
     }
 }

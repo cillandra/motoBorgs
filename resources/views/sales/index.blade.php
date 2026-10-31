@@ -6,6 +6,7 @@
 @if($unavailable??false)
 <section class="panel stack" role="alert"><h2>Data unavailable</h2><p>Sales could not be loaded. Your selected filters are preserved.</p><a class="button button-secondary" href="{{ route('sales.index',$filters) }}">Retry</a></section>
 @else
+@if(isset($context))<x-reporting-period :context="$context" mode="sales" :filters="$filters??[]" />@endif
 <section class="sales-summary" aria-label="Filtered sale totals">
 <x-metric-card :label="'Sales recorded · '.$summary['count'].' transactions'" :value="'₱'.\App\Support\Money::display($summary['recorded'])" icon="reports" tone="info" />
 <x-metric-card label="Paid refunds linked to these sales" :value="'₱'.\App\Support\Money::display($summary['refunded'])" icon="receipt" tone="danger" />

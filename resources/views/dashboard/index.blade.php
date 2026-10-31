@@ -1,8 +1,11 @@
 @extends('layouts.app')
 @section('title','Dashboard')
 @section('content')
+@php
+    $selectedToday=$context['is_today']??($date===now('Asia/Manila')->toDateString());
+@endphp
 <header class="page-heading dashboard-heading">
-    <div><h1>{{ auth()->user()->isManager()?'Shop overview':'Your work today' }}</h1><p>{{ auth()->user()->isManager()?'All shop sales and stock':'Your sales and transactions' }} · {{ \Carbon\CarbonImmutable::parse($date,'Asia/Manila')->format('l, j F Y') }}</p></div>
+    <div><h1>{{ auth()->user()->isManager()?'Shop overview':($selectedToday?'Your work today':'Your work on selected date') }}</h1><p>{{ auth()->user()->isManager()?'All shop sales and stock':'Your sales and transactions' }} · {{ \Carbon\CarbonImmutable::parse($date,'Asia/Manila')->format('l, j F Y') }}</p></div>
     <div class="action-row"><form method="get"><label class="sr-only" for="dashboard-date">Business date · Manila</label><input class="form-input" type="date" name="date" id="dashboard-date" value="{{ $date }}" data-dashboard-date><noscript><button class="button button-secondary">Apply</button></noscript></form><a class="button button-primary" href="{{ route('pos.index') }}">New sale</a></div>
 </header>
 @if($unavailable??false)
@@ -17,14 +20,15 @@
         [auth()->user()->isManager()?'Stock alerts':'My held carts',auth()->user()->isManager()?$data['stock_alerts']['count']:$data['held_count'],auth()->user()->isManager()?($data['stock_alerts']['count']-$data['stock_alerts']['out']).' low · '.$data['stock_alerts']['out'].' out of stock':'Unpaid · stock not reserved',auth()->user()->isManager()?'activity':'cart','attention'],
     ];
 @endphp
+@if(isset($context))<x-reporting-period :context="$context" mode="dashboard" :filters="$filters??[]" />@endif
 <section class="dashboard-kpis" aria-label="Business date totals">
-    @foreach($metrics as [$label,$value,$context,$icon,$tone])
-    <x-metric-card class="dashboard-kpi" data-metric="{{ $tone }}" :label="ucfirst($label)" :value="$value" :help="$context" :icon="$icon" :tone="['sales'=>'success','completed'=>'info','units'=>'violet','attention'=>'warning'][$tone]" />
+    @foreach($metrics as [$label,$value,$metricHelp,$icon,$tone])
+    <x-metric-card class="dashboard-kpi" data-metric="{{ $tone }}" :label="ucfirst($label)" :value="$value" :help="$metricHelp" :icon="$icon" :tone="['sales'=>'success','completed'=>'info','units'=>'violet','attention'=>'warning'][$tone]" />
     @endforeach
 </section>
 <div class="dashboard-columns">
     <section class="panel dashboard-panel">
-        <header><h2>{{ auth()->user()->isManager()?'Sales today':'My sales today' }}</h2></header><p>Net sales by sale / paid-refund hour · Manila · {{ $date }}</p>
+        <header><h2>{{ ucfirst($prefix.'sales').($selectedToday?' today':' on selected date') }}</h2></header><p>Net sales by sale / paid-refund hour · Manila · {{ $date }}</p>
         @php
             $activeHours=collect($data['hourly_sales'])->filter(fn($hour)=>$hour['sales_centavos']!==0)->pluck('hour');
             $firstHour=max(0,($activeHours->min()??11)-2); $lastHour=min(23,max($firstHour+5,$activeHours->max()??14));

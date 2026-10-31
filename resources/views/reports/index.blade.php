@@ -4,6 +4,7 @@
 <div class="reports-page">
 <header class="page-heading"><div><h1>Reports & analytics</h1><p>Reconcile recorded sales, returned units and paid refunds.</p></div><div class="action-row"><a class="button button-secondary" href="{{ route('sales.index') }}">Sales history</a><x-button variant="secondary" data-dialog-open="export-report">Export report</x-button></div></header>
 @if($errors->any())<div class="inline-alert error" role="alert">{{ $errors->first() }}</div>@endif
+@if(isset($context))<x-reporting-period :context="$context" mode="reports" :filters="$filters??[]" />@endif
 <form class="report-filters" method="get" action="{{ route('reports.index') }}">
 <input type="hidden" name="tab" value="{{ $tab }}"><x-input id="start" type="date" label="From · Manila" :value="old('start',$filter->start)" required /><x-input id="end" type="date" label="Through · Manila" :value="old('end',$filter->end)" required />
 @if(isset($variants))<div class="field"><label for="variant_id">Product / variant</label><div class="field-perimeter"><select name="variant_id" id="variant_id"><option value="">All variants</option>@foreach($variants as $variant)<option value="{{ $variant->variant_id }}" @selected($filter->variantId===$variant->variant_id)>{{ $variant->product_name }} · {{ $variant->sku }}</option>@endforeach</select></div></div>

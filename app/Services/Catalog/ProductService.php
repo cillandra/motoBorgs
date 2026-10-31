@@ -6,10 +6,13 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\Variant;
 use App\Services\Audit\AuditRecorder;
 use App\Services\System\OperationGuard;
 use App\Support\Money;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -22,6 +25,10 @@ class ProductService
         $newImage = null;
         try {
             return app(OperationGuard::class)->transaction(function () use ($actor, $product, $validated, &$newImage): Product {
+                $catalogLock = DB::table('catalog_locks')->where('name', 'identifiers')->lockForUpdate()->first();
+                abort_unless($catalogLock, 503, 'Catalog configuration is incomplete. Run the pending database migrations.');
+                $actor = User::whereKey($actor->id)->lockForUpdate()->first();
+                abort_unless($actor?->isManager(), 403);
                 $data = Arr::only($validated, ['name', 'brand', 'category_id', 'part_number', 'compatibility', 'description']);
                 if (! empty($validated['category_name'])) {
                     $data['category_id'] = Category::firstOrCreate(['name' => trim($validated['category_name'])])->id;
@@ -40,7 +47,23 @@ class ProductService
                     $variant->barcode = $row['barcode'] ?? null;
                     $variant->price_centavos = Money::parse($row['price']);
                     $variant->version = ($variant->version ?? 0) + 1;
-                    $variant->save();
+                    $variant->sku = trim($variant->sku);
+                    $variant->barcode = trim((string) $variant->barcode) ?: null;
+                    foreach (['sku', 'barcode'] as $identifier) {
+                        $code = $variant->{$identifier};
+                        if ($code !== null && Variant::where(fn ($query) => $query->where('sku', $code)->orWhere('barcode', $code))->when($variant->exists, fn ($query) => $query->where('id', '!=', $variant->id))->lockForUpdate()->first(['id'])) {
+                            throw ValidationException::withMessages(['variants.'.$index.'.'.$identifier => 'This code is already used as another variant SKU or barcode.']);
+                        }
+                    }
+                    try {
+                        $variant->save();
+                    } catch (QueryException $error) {
+                        if (($error->errorInfo[1] ?? null) === 1062) {
+                            $field = str_contains($error->getMessage(), 'variants_barcode_unique') ? 'barcode' : 'sku';
+                            throw ValidationException::withMessages(['variants.'.$index.'.'.$field => 'This code was just used by another product. Reload and choose a unique code.']);
+                        }
+                        throw $error;
+                    }
                     $ids[] = $variant->id;
                 }
                 $product->variants()->whereNotIn('id', $ids)->whereNull('archived_at')->update(['archived_at' => now()]);

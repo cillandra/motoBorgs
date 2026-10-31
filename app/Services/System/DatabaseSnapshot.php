@@ -9,7 +9,7 @@ use Symfony\Component\Process\Process;
 
 class DatabaseSnapshot
 {
-    public const TABLES = ['access_reset_tokens', 'approvals', 'audit_events', 'backup_manifests', 'cache', 'cache_locks', 'cart_lines', 'carts', 'categories', 'failed_jobs', 'job_batches', 'jobs', 'migrations', 'notifications', 'password_reset_tokens', 'payment_records', 'preferences', 'products', 'refund_records', 'return_lines', 'return_requests', 'sale_lines', 'sales', 'sessions', 'settings', 'stock_movements', 'units', 'users', 'variants'];
+    public const TABLES = ['access_reset_tokens', 'approvals', 'audit_events', 'backup_manifests', 'cache', 'cache_locks', 'cart_lines', 'carts', 'catalog_locks', 'categories', 'failed_jobs', 'job_batches', 'jobs', 'migrations', 'notifications', 'password_reset_tokens', 'payment_records', 'preferences', 'products', 'refund_records', 'return_lines', 'return_requests', 'sale_lines', 'sales', 'sessions', 'settings', 'stock_movements', 'units', 'users', 'variants'];
 
     public const EPHEMERAL = ['sessions', 'cache', 'cache_locks', 'password_reset_tokens', 'access_reset_tokens', 'jobs', 'job_batches', 'failed_jobs', 'backup_manifests'];
 
