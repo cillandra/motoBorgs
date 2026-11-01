@@ -24,11 +24,11 @@ class ReportingContext
         $today = now('Asia/Manila')->toDateString();
         $isToday = $start === $today && $end === $today;
         $label = match (true) {
-            $isToday => 'Showing today · '.$today.' · Manila',
-            $start !== null && $start === $end => 'Showing '.$start.' · Manila',
-            $start !== null && $end !== null => 'Showing '.$start.' through '.$end.' · Manila',
-            $start !== null => 'Showing from '.$start.' · Manila',
-            $end !== null => 'Showing through '.$end.' · Manila',
+            $isToday => 'Showing today · '.$today,
+            $start !== null && $start === $end => 'Showing '.$start,
+            $start !== null && $end !== null => 'Showing '.$start.' to '.$end,
+            $start !== null => 'Showing on or after '.$start,
+            $end !== null => 'Showing on or before '.$end,
             default => 'Showing all dates',
         };
 

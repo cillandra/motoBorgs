@@ -2,7 +2,7 @@
 @section('title','Sales history')
 @section('content')
 <header class="page-heading"><div><h1>Return items</h1><p>Sale MOTO-{{ str_pad($sale->id,8,'0',STR_PAD_LEFT) }} · {{ $sale->cashier_name }}</p></div><a data-modal-link class="button button-secondary" href="{{ Route::has('sales.show')?route('sales.show',$sale):route('sales.receipt',[$sale,'copy'=>1]) }}">Back to transaction</a></header>
-<div class="information-notice"><img src="{{ asset('assets/icons/info.svg') }}" alt=""><div><strong>Manager approval required</strong><p>Check the items, quantities and reason. Keep the original sale record. Sellable stock and payout outcomes are reviewed separately.</p></div></div>
+<div class="information-notice"><img src="{{ asset('assets/icons/info.svg') }}" alt=""><div><strong>Manager approval required</strong><p>Check the items, quantities and reason. Keep the original sale record. Sellable stock and refund payments are reviewed separately.</p></div></div>
 <form action="{{ route('returns.store',$sale) }}" method="post" class="return-workspace" data-return-request-form>@csrf
 <section class="panel return-information stack"><x-section-heading tag="h2" icon="receipt" tone="success">Items being returned</x-section-heading>
 @foreach($sale->lines as $line)

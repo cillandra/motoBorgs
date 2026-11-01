@@ -111,6 +111,6 @@ class StockLedgerTest extends TestCase
         $this->post('/inventory/'.$variant->id.'/stock', ['type' => 'receive', 'quantity' => 2, 'reference' => 'DEL-01', 'reason' => 'New stock', 'operation_key' => (string) Str::uuid(), 'date' => now('Asia/Manila')->toDateString()])->assertRedirect('/inventory/'.$variant->id);
         $movement = $variant->movements()->where('type', 'receive')->firstOrFail();
         $this->assertSame(now('Asia/Manila')->toDateString(), $movement->occurred_at->timezone('Asia/Manila')->toDateString());
-        $this->get('/inventory/'.$variant->id)->assertOk()->assertSee('Stock movements')->assertSee('DEL-01');
+        $this->get('/inventory/'.$variant->id)->assertOk()->assertSee('Stock change history')->assertSee('DEL-01');
     }
 }

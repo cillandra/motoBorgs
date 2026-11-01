@@ -20,7 +20,7 @@
 <p class="result-summary">{{ $variants->total() }} {{ !empty($filters['archived'])?'archived':'active' }} variants found</p>
 @if(($filters['view']??'cards')==='table')
 <section class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Product / SKU</th><th>Variant</th><th>Category</th><th>Price</th><th>Available</th><th>Status</th><th>Action</th></tr></thead><tbody>
-@forelse($variants as $variant)<tr><td><strong>{{ $variant->product->name }}</strong><small>{{ $variant->sku }}</small></td><td>{{ $variant->name }}</td><td>{{ $variant->product->category?->name??'Uncategorized' }}</td><td>₱{{ \App\Support\Money::display($variant->price_centavos) }}</td><td>{{ $variant->stock }} {{ $variant->unit->code }}</td><td><x-stock-badge :variant="$variant" /></td><td><a data-modal-link class="button button-secondary" href="{{ route('inventory.show',$variant) }}">View</a></td></tr>@empty<tr><td colspan="7"><x-empty-state /></td></tr>@endforelse
+@forelse($variants as $variant)<tr><td><strong>{{ $variant->product->name }}</strong><small>{{ $variant->sku }}</small></td><td>{{ $variant->name }}</td><td>{{ $variant->product->category?->name??'Uncategorized' }}</td><td>₱{{ \App\Support\Money::display($variant->price_centavos) }}</td><td>{{ $variant->stock }} {{ $variant->unit->code }}</td><td><x-stock-badge :variant="$variant" /></td><td><a data-modal-link class="button button-secondary" href="{{ route('inventory.show',$variant) }}">View details</a></td></tr>@empty<tr><td colspan="7"><x-empty-state /></td></tr>@endforelse
 </tbody></table></div></section>
 @else
 <div class="inventory-grid">

@@ -147,7 +147,7 @@ class EmployeeActivityTest extends TestCase
             $this->get($url)->assertRedirect(route('password.change'));
         }
         $this->postJson('/pos/carts/999', ['action' => 'add'])->assertStatus(423);
-        $this->get('/access/change')->assertOk()->assertSee('Choose your own passphrase');
+        $this->get('/access/change')->assertOk()->assertSee('Choose your own password');
         $this->post('/access/change', ['current_password' => 'Unit test passphrase 2026!', 'password' => 'My own demonstration passphrase!', 'password_confirmation' => 'My own demonstration passphrase!'])->assertRedirect(route('login'));
         $this->assertFalse($employee->fresh()->force_password_change);
         $this->assertGuest();

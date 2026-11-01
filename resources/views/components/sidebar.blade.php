@@ -1,6 +1,6 @@
 @php
-$items = [['dashboard','Dashboard','dashboard'],['pos.index','Sales / POS','cart'],['inventory.index','Product inventory','inventory'],['sales.index','Sales history','receipt']];
-if(auth()->user()->isManager()) { $items = array_merge($items,[['reports.index','Reports & analytics','reports'],['employees.index','Management hub','users'],['activity.index','Employee activity hub','activity']]); }
+$items = [['dashboard','Dashboard','dashboard'],['pos.index','Point of sale (POS)','cart'],['inventory.index','Product inventory','inventory'],['sales.index','Sales history','receipt']];
+if(auth()->user()->isManager()) { $items = array_merge($items,[['reports.index','Reports & analytics','reports'],['employees.index','Employee management','users'],['activity.index','Employee activity','activity']]); }
 @endphp
 <aside id="main-sidebar" class="sidebar" aria-label="Main navigation">
 <a href="{{ route('dashboard') }}" class="sidebar-brand"><img src="{{ asset('assets/brand/borgs-logo.png') }}" alt="" width="44" height="44"><div><span class="wordmark">MOTO</span><span class="racing-signature"></span><span class="brand-description">Borg’s Motorcycle<br>Parts & Accessories</span></div></a>

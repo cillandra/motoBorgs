@@ -2,7 +2,7 @@
 @section('title','Return requests')
 @section('content')
 <div class="return-queue">
-<header class="page-heading"><div><h1>Return requests</h1><p>{{ auth()->user()->isManager()?'Review employee requests and keep approval decisions on record.':'Track return requests for your sales.' }}</p></div>@if(Route::has('sales.index'))<a class="button button-secondary" href="{{ route('sales.index') }}">Back to sales</a>@endif</header>
+<header class="page-heading"><div><h1>Return requests</h1><p>{{ auth()->user()->isManager()?'Review employee requests and keep approval decisions on record.':'Track return requests for your sales.' }}</p></div>@if(Route::has('sales.index'))<a class="button button-secondary" href="{{ route('sales.index') }}">Back to sales history</a>@endif</header>
 <nav class="tabs" aria-label="Return status">@foreach([''=>'All requests','pending'=>'Pending','accepted'=>'Approved','rejected'=>'Rejected'] as $value=>$label)<a @class(['tab','active'=>($filters['status']??'')===$value]) href="{{ route('returns.index',['status'=>$value]) }}">{{ $label }}</a>@endforeach</nav>
 <div class="return-request-list">
 @forelse($returns as $return)

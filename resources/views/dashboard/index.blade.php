@@ -6,7 +6,7 @@
 @endphp
 <header class="page-heading dashboard-heading">
     <div><h1>{{ auth()->user()->isManager()?'Shop overview':($selectedToday?'Your work today':'Your work on selected date') }}</h1><p>{{ auth()->user()->isManager()?'All shop sales and stock':'Your sales and transactions' }} · {{ \Carbon\CarbonImmutable::parse($date,'Asia/Manila')->format('l, j F Y') }}</p></div>
-    <div class="action-row"><form method="get"><label class="sr-only" for="dashboard-date">Business date · Manila</label><input class="form-input" type="date" name="date" id="dashboard-date" value="{{ $date }}" data-dashboard-date><noscript><button class="button button-secondary">Apply</button></noscript></form><a class="button button-primary" href="{{ route('pos.index') }}">New sale</a></div>
+    <div class="action-row"><form method="get"><label class="sr-only" for="dashboard-date">Sales date</label><input class="form-input" type="date" name="date" id="dashboard-date" value="{{ $date }}" data-dashboard-date><noscript><button class="button button-secondary">Apply</button></noscript></form><a class="button button-primary" href="{{ route('pos.index') }}">New sale</a></div>
 </header>
 @if($unavailable??false)
 <section class="panel stack" role="alert"><h2>Data unavailable</h2><p>The dashboard could not load for {{ $date }}. Totals are unavailable.</p><a class="button button-secondary" href="{{ route('dashboard',['date'=>$date]) }}">Retry</a></section>
@@ -17,7 +17,7 @@
         [$prefix.'net sales','₱'.\App\Support\Money::display($data['net_sales']),'Completed sales less paid refunds','receipt','sales'],
         [$prefix.'completed sales',$data['completed_count'],'Selected business date','reports','completed'],
         [$prefix.'units sold',$data['net_units'],'Less units accepted as returns','inventory','units'],
-        [auth()->user()->isManager()?'Stock alerts':'My held carts',auth()->user()->isManager()?$data['stock_alerts']['count']:$data['held_count'],auth()->user()->isManager()?($data['stock_alerts']['count']-$data['stock_alerts']['out']).' low · '.$data['stock_alerts']['out'].' out of stock':'Unpaid · stock not reserved',auth()->user()->isManager()?'activity':'cart','attention'],
+        [auth()->user()->isManager()?'Stock alerts':'My saved orders',auth()->user()->isManager()?$data['stock_alerts']['count']:$data['held_count'],auth()->user()->isManager()?($data['stock_alerts']['count']-$data['stock_alerts']['out']).' low · '.$data['stock_alerts']['out'].' out of stock':'Unpaid · stock not reserved',auth()->user()->isManager()?'activity':'cart','attention'],
     ];
 @endphp
 @if(isset($context))<x-reporting-period :context="$context" mode="dashboard" :filters="$filters??[]" />@endif
@@ -28,7 +28,7 @@
 </section>
 <div class="dashboard-columns">
     <section class="panel dashboard-panel">
-        <header><h2>{{ ucfirst($prefix.'sales').($selectedToday?' today':' on selected date') }}</h2></header><p>Net sales by sale / paid-refund hour · Manila · {{ $date }}</p>
+        <header><h2>{{ ucfirst($prefix.'sales').($selectedToday?' today':' on selected date') }}</h2></header><p>Net sales by sale / paid-refund hour · {{ $date }}</p>
         @php
             $activeHours=collect($data['hourly_sales'])->filter(fn($hour)=>$hour['sales_centavos']!==0)->pluck('hour');
             $firstHour=max(0,($activeHours->min()??11)-2); $lastHour=min(23,max($firstHour+5,$activeHours->max()??14));
@@ -69,8 +69,8 @@
     </section>
     <section class="panel dashboard-panel dashboard-panel--activity" aria-labelledby="dashboard-activity-title">
         <header class="dashboard-section-header">
-            <div class="dashboard-section-title"><span class="dashboard-heading-icon" aria-hidden="true"><span class="dashboard-icon" style="--dashboard-icon:url('{{ asset('assets/icons/'.(auth()->user()->isManager()?'users':'cart').'.svg') }}')"></span></span><h2 id="dashboard-activity-title">{{ auth()->user()->isManager()?'Employee activity':'My held carts' }}</h2></div>
-            @if(auth()->user()->isManager() && Route::has('activity.index'))<a class="button button-ghost" href="{{ route('activity.index',['start'=>$date,'end'=>$date]) }}">View log</a>@elseif(!auth()->user()->isManager())<a class="button button-ghost" href="{{ route('pos.index',['held'=>1]) }}">Open held</a>@endif
+            <div class="dashboard-section-title"><span class="dashboard-heading-icon" aria-hidden="true"><span class="dashboard-icon" style="--dashboard-icon:url('{{ asset('assets/icons/'.(auth()->user()->isManager()?'users':'cart').'.svg') }}')"></span></span><h2 id="dashboard-activity-title">{{ auth()->user()->isManager()?'Employee activity':'My saved orders' }}</h2></div>
+            @if(auth()->user()->isManager() && Route::has('activity.index'))<a class="button button-ghost" href="{{ route('activity.index',['start'=>$date,'end'=>$date]) }}">View log</a>@elseif(!auth()->user()->isManager())<a class="button button-ghost" href="{{ route('pos.index',['held'=>1]) }}">View saved orders</a>@endif
         </header>
         @if(auth()->user()->isManager())
             <p>Recent recorded activity · selected date</p>
@@ -94,11 +94,11 @@
             </ol>
         @else
             <p>{{ $data['held_count'] }} unpaid carts · your account only</p>
-            @forelse($data['held_carts'] as $cart)<a class="dashboard-activity" href="{{ route('pos.index',['held'=>1]) }}"><strong>{{ $cart->label??'Held cart #'.$cart->id }}</strong><small>{{ $cart->lines_count }} variants · unpaid</small></a>@empty<div class="dashboard-quiet-state"><p>No held carts.</p></div>@endforelse
-            <p class="measure-note">Held carts do not reserve stock.</p>
+            @forelse($data['held_carts'] as $cart)<a class="dashboard-activity" href="{{ route('pos.index',['held'=>1]) }}"><strong>{{ $cart->label??'Held cart #'.$cart->id }}</strong><small>{{ $cart->lines_count }} {{ $cart->lines_count===1?'product option':'product options' }} · unpaid</small></a>@empty<div class="dashboard-quiet-state"><p>No saved orders.</p></div>@endforelse
+            <p class="measure-note">Saved orders do not reserve stock.</p>
         @endif
     </section>
 </div>
-<footer class="dashboard-footer"><p>Held and cancelled carts are excluded. Refund money uses payout date; returned units use acceptance date. Net sales is revenue, not profit.</p><a class="button button-ghost" href="{{ route('dashboard',['date'=>$date]) }}">Refresh</a></footer>
+<footer class="dashboard-footer"><p>Saved unpaid orders and cancelled orders are excluded. Refunds use the date they were paid; returned units use the date the return was approved. Net sales is revenue, not profit.</p><a class="button button-ghost" href="{{ route('dashboard',['date'=>$date]) }}">Refresh</a></footer>
 @endif
 @endsection

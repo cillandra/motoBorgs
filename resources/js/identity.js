@@ -8,7 +8,7 @@ function initializeEmployees(root=document){
     const update=()=>{
         const manager=role.value==='manager';
         form.querySelector('[data-role-label]').textContent=manager?'Manager':'Staff';
-        form.querySelector('[data-role-description]').textContent=manager?'Manage shop inventory, reports, employee access, global settings and sensitive approvals. Each approval still requires a current passphrase.':'Access own POS transactions, held carts and sale history, and view available products.';
+        form.querySelector('[data-role-description]').textContent=manager?'Manage shop inventory, reports, employee access, global settings and sensitive approvals. Each approval still requires a current password.':'Access own point-of-sale transactions, saved orders and sale history, and view available products.';
         const needed=role.value!==form.dataset.originalRole || (!form.querySelector('[name="version"]') && manager);
         confirmation.hidden=!needed;
         confirmation.querySelector('input').required=needed;
