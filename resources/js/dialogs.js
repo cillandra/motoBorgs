@@ -11,6 +11,14 @@ document.addEventListener('click', (event) => {
     if (opener) {
         const scope = opener.closest('[data-workspace-content]') || document;
         const target = scope.querySelector('#' + CSS.escape(opener.dataset.dialogOpen)) || document.getElementById(opener.dataset.dialogOpen);
+        const source = opener.closest('form');
+        const filters = target?.querySelector('form[method="get"]');
+        if (source?.getAttribute('method')?.toLowerCase() === 'get' && filters) {
+            const values = new FormData(source);
+            filters.querySelectorAll('input[type="hidden"][name]').forEach((input) => {
+                if (values.has(input.name)) input.value = values.get(input.name);
+            });
+        }
         target?.showModal();
     }
     const dismiss = event.target.closest('[data-dismiss-toast]');

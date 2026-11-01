@@ -1,10 +1,5 @@
 const inventoryInitialized = new WeakSet();
 function initializeInventory(root = document) {
-    root.querySelectorAll('[data-auto-filter]').forEach((select) => {
-        if (inventoryInitialized.has(select)) return;
-        inventoryInitialized.add(select);
-        select.addEventListener('change', () => select.form.requestSubmit());
-    });
     root.querySelectorAll('[data-product-form]').forEach((form) => {
         if (inventoryInitialized.has(form)) return;
         inventoryInitialized.add(form);

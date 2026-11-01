@@ -1,3 +1,4 @@
+import { clearValidation, showValidation, revealField } from './validation.js';
 const initializedSettings=new WeakSet();
 let currentSettings=null;
 function feedback(message,tone='success'){
@@ -21,24 +22,24 @@ function initializeSettings(root=document){
     function update(){state.dirty=signature()!==state.baseline;save.disabled=state.busy||!state.dirty;discard.hidden=!state.dirty;discard.disabled=state.busy;status.textContent=state.busy?'Saving…':state.dirty?'You have unsaved changes.':'No unsaved changes.';form.querySelectorAll('.setting-switch').forEach(row=>{row.querySelector('[data-switch-label]').textContent=row.querySelector('[type=checkbox]').checked?'Enabled':'Disabled';});}
     state.update=update;state.reset=()=>{form.reset();if(wrapper.dataset.section==='preferences'&&state.savedPreferences)applyPreferences(state.savedPreferences);};
     form.addEventListener('input',update);form.addEventListener('change',()=>{if(wrapper.dataset.section==='preferences')applyPreferences(formPreferences(form));update();});
-    form.addEventListener('reset',()=>queueMicrotask(()=>{form.querySelectorAll('[data-settings-error]').forEach(error=>error.remove());if(wrapper.dataset.section==='preferences'&&state.savedPreferences)applyPreferences(state.savedPreferences);update();}));
+    form.addEventListener('reset',()=>queueMicrotask(()=>{form.querySelectorAll('[data-settings-error]').forEach(error=>error.remove());clearValidation(form);if(wrapper.dataset.section==='preferences'&&state.savedPreferences)applyPreferences(state.savedPreferences);update();}));
     async function saveChanges(password=null){
         if(state.busy)return;
         let invalidField=null;
-        form.querySelectorAll('[aria-invalid]').forEach(field=>{field.removeAttribute('aria-invalid');field.removeAttribute('aria-describedby');});
+        clearValidation(form);
         const payload=new FormData(form);if(password!==null)payload.set('manager_password',password);
         const fields=[...form.elements],disabled=fields.map(field=>field.disabled);state.busy=true;update();fields.forEach(field=>field.disabled=true);
         form.querySelectorAll('[data-settings-error]').forEach(error=>error.remove());
         const confirmation=wrapper.querySelector('#settings-reauth');confirmation.dataset.processing='true';confirmation.querySelectorAll('button').forEach(button=>button.disabled=true);
         try{
             const response=await fetch(form.getAttribute('action'),{method:'POST',headers:{Accept:'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content},body:payload});
-            const data=await response.json().catch(()=>({}));if(!response.ok){for(const key of Object.keys(data.errors||{})){const parts=key.split('.');const name=parts.shift()+parts.map(part=>'['+part+']').join('');const field=[...form.elements].find(input=>input.name===name&&input.type!=='hidden');if(field){field.setAttribute('aria-invalid','true');field.setAttribute('aria-describedby','settings-validation-summary');invalidField ||= field;}}throw new Error(Object.values(data.errors||{}).flat().join(' ')||data.message||'The save could not be confirmed. Keep your changes and retry.');}
+            const data=await response.json().catch(()=>({}));if(!response.ok){invalidField=showValidation(form,data.errors,'settings-field');throw new Error(Object.values(data.errors||{}).flat().join(' ')||data.message||'The save could not be confirmed. Keep your changes and retry.');}
             if(data.version!==undefined)form.querySelector('[name=version]').value=data.version;
             if(wrapper.dataset.section==='preferences'){applyPreferences(data.values);state.savedPreferences=data.values;}
             fields.forEach((field,index)=>field.disabled=disabled[index]);rememberDefaults(form);state.baseline=signature();state.dirty=false;confirmation.close();feedback(data.message||'Settings saved.');
         }catch(error){
             const alert=document.createElement('div');alert.className='inline-alert error';alert.dataset.settingsError='';alert.id='settings-validation-summary';alert.setAttribute('role','alert');alert.tabIndex=-1;alert.textContent=error.message;form.querySelector('.settings-scroll').prepend(alert);alert.focus();confirmation.close();document.dispatchEvent(new CustomEvent('moto:feedback',{detail:{tone:'error'}}));
-        }finally{state.busy=false;fields.forEach((field,index)=>field.disabled=disabled[index]);delete confirmation.dataset.processing;confirmation.querySelectorAll('button').forEach(button=>button.disabled=false);update();if(invalidField?.isConnected)invalidField.focus();}
+        }finally{state.busy=false;fields.forEach((field,index)=>field.disabled=disabled[index]);delete confirmation.dataset.processing;confirmation.querySelectorAll('button').forEach(button=>button.disabled=false);update();revealField(invalidField);}
     }
     form.addEventListener('submit',event=>{event.preventDefault();if(!form.checkValidity()||!state.dirty||state.busy)return;if(form.dataset.sensitive==='1')wrapper.querySelector('#settings-reauth').showModal();else saveChanges();});
     wrapper.querySelector('[data-settings-reauth]').addEventListener('submit',event=>{event.preventDefault();const input=event.target.querySelector('[name=manager_password]');const password=input.value;input.value='';saveChanges(password);});
@@ -86,3 +87,21 @@ document.addEventListener('moto:toggle-theme',async()=>{
     catch(error){applyPreferences(previous);feedback(error.message,'error');}
 });
 initializeSettings();document.addEventListener('moto:content-ready',event=>initializeSettings(event.detail.root));
+
+document.addEventListener('change', async (event) => {
+    const select = event.target.closest('[data-settings-category-select]');
+    if (!select) return;
+    const previous = select.closest('[data-settings-root]').querySelector('.settings-category.active')?.href;
+    const next = select.value;
+    select.disabled = true;
+    try {
+        if (!(await mayLeaveSettings())) { if (previous) select.value = previous; return; }
+        if (window.motoModal) {
+            const refreshed = await window.motoModal.refresh(next, true);
+            if (!refreshed && previous) select.value = previous;
+        } else window.location.assign(next);
+    } finally {
+        if (select.isConnected) select.disabled = false;
+        document.querySelector('[data-settings-category-select]')?.focus();
+    }
+});

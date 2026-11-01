@@ -85,7 +85,7 @@ table td>a:not(.button):hover{text-decoration:underline}
 .pos-products{grid-auto-rows:max-content}
 .pos-product-action{flex-shrink:0}
 .inventory-grid{align-items:stretch}
-.add-product-tile{height:auto;min-height:366px}
+
 [data-stock=in]{--stock-bg:var(--ui-success-bg);--stock-accent:var(--ui-success-accent);--stock-copy:var(--ui-success-copy);--stock-border:var(--ui-success-border)}
 [data-stock=low]{--stock-bg:var(--ui-warning-bg);--stock-accent:var(--ui-warning-accent);--stock-copy:var(--ui-warning-copy);--stock-border:var(--ui-warning-border)}
 [data-stock=out]{--stock-bg:var(--ui-danger-bg);--stock-accent:var(--ui-danger-accent);--stock-copy:var(--ui-danger-copy);--stock-border:var(--ui-danger-border)}
@@ -144,7 +144,7 @@ table td>a:not(.button):hover{text-decoration:underline}
 .sign-in-panel{border-color:var(--ui-info-border)}
 .access-reset{border-color:var(--ui-violet-border)}
 @media(max-width:1100px){.report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.metric-card,.report-kpis .metric-card,.sales-summary .metric-card{padding:16px;min-height:144px}}
-@media(max-width:900px){.inventory-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.inventory-filters .field:first-child{grid-column:1/-1}.inventory-filters>.clear-filters{justify-self:start}.stock-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.page-heading h1{font-size:24px;line-height:32px}.page-heading h1::before{width:24px;height:24px}}
+@media(max-width:900px){.inventory-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.inventory-filters .field:first-child{grid-column:1/-1}.stock-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.page-heading h1{font-size:24px;line-height:32px}.page-heading h1::before{width:24px;height:24px}}
 @media(max-width:600px){.report-kpis,.sales-summary,.stock-metrics{grid-template-columns:1fr}.page-heading{flex-wrap:wrap}.page-heading>.action-row{flex-wrap:wrap}.inventory-filters{grid-template-columns:1fr}.section-heading{font-size:16px;line-height:24px}.metric-card .metric-value{font-size:28px;line-height:36px}}
 @media print{.page-heading h1::before,.ui-heading-icon,.kpi-icon,.modal>header>div::before{display:none!important}.section-heading{display:block}.metric-card,.report-kpis .metric-card,.sales-summary .metric-card{background:#fff!important;border-color:#bbb!important}.metric-card :is(.metric-label,.metric-value,.metric-context){color:#111!important}.ui-status{background:#fff!important;color:#111!important;border-color:#777!important}}
 

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Sales history')
+@section('title','Return requests')
 @section('content')
 <div class="return-queue">
 <header class="page-heading"><div><h1>Return requests</h1><p>{{ auth()->user()->isManager()?'Review employee requests and keep approval decisions on record.':'Track return requests for your sales.' }}</p></div>@if(Route::has('sales.index'))<a class="button button-secondary" href="{{ route('sales.index') }}">Back to sales</a>@endif</header>

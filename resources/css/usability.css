@@ -1,0 +1,68 @@
+/* Shared task controls keep the existing MOTO palette and card treatment. */
+.button-secondary:hover:not(:disabled), .button-ghost:hover:not(:disabled){background:var(--ui-hover);border-color:var(--border-control)}
+.button-danger:hover:not(:disabled){background:#bc293d}
+.button:disabled:hover{cursor:not-allowed}
+select[aria-invalid=true], textarea[aria-invalid=true]{border-color:var(--error)}
+.field-error{margin-top:4px;line-height:18px}
+.field>label{font-weight:600}
+.numeric{font-variant-numeric:tabular-nums}
+.table-scroll:focus-visible{outline:2px solid var(--error);outline-offset:4px;border-radius:4px}
+.table-scroll table th.numeric, .table-scroll table td.numeric{text-align:right}
+.table-panel .table-scroll{border-radius:8px}
+.page-heading>.button, .page-heading>.action-row{flex-shrink:0}
+.filter-actions{padding:4px;justify-content:flex-end}
+.inventory-filters{grid-template-columns:minmax(180px,1.6fr) repeat(3,minmax(120px,1fr))}
+.inventory-filters>.filter-actions{grid-column:1/-1;border-top:1px solid var(--border);padding-top:12px;margin-top:4px}
+.pos-search-row{align-items:flex-end;flex-wrap:wrap}
+.pos-search-row>.field{flex:1 1 180px;min-width:0}
+.pos-search-row>.field>label{position:static;clip-path:none;width:auto;height:auto;overflow:visible}
+.pos-search-row>.button{margin-bottom:4px}
+.pos-filter-row{padding-bottom:8px;border-bottom:1px solid var(--border)}
+.barcode-entry>summary{padding:8px 4px;font-weight:500}
+.barcode-entry .action-row{align-items:stretch;margin-top:8px}
+.barcode-entry .form-input{flex:1 1 180px;min-width:0}
+.pos-result-row{font-size:13px;line-height:20px}
+.settings-mobile-category,.pos-order-shortcut{display:none}
+#pos-catalog,#current-order{scroll-margin-top:80px}
+.settings-categories{max-height:calc(100dvh - 112px);overflow-y:auto;position:sticky;top:88px}
+.settings-category{white-space:normal;overflow-wrap:anywhere}
+.settings-action-bar [data-settings-status]{line-height:20px}
+.sidebar-backdrop{position:fixed;inset:0;border:0;background:#0009;z-index:29;cursor:pointer}
+:root[data-sidebar=expanded] .sidebar-link{white-space:normal;line-height:20px;padding:10px 12px;gap:10px}
+:root[data-sidebar=expanded] .sidebar-link span{min-width:0;overflow-wrap:anywhere}
+:root[data-sidebar=expanded] .sidebar-link.active::before{left:0}
+:root[data-sidebar=expanded] .sidebar [data-sidebar-toggle] img{transform:rotate(180deg)}
+.sidebar-account .account-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar .avatar{background:#212d4a;color:#f4efe2}
+.profile-menu>summary:focus-visible{outline:2px solid var(--error);outline-offset:3px;border-radius:8px}
+@media screen and (max-width:1100px){
+    .inventory-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .inventory-filters .field:first-child{grid-column:auto}
+}
+@media screen and (max-width:900px){.pos-order-shortcut{display:inline-flex}}
+@media screen and (max-width:800px){
+    .sidebar{width:240px;max-width:calc(100vw - 48px);transform:translateX(-100%);visibility:hidden}
+    :root[data-sidebar=expanded] .sidebar{transform:translateX(0);visibility:visible}
+    .main-workspace{margin-left:0}
+    :root[data-sidebar=expanded] body{overflow:hidden}
+    .settings-mobile-category{display:block;margin-bottom:16px}
+    .settings-categories{display:none}
+    .settings-workspace{gap:0}
+    .settings-action-bar{flex-wrap:wrap}
+    .settings-action-bar>p{flex:1 1 100%;max-width:none}
+    .settings-action-bar>.button{flex:1}
+    .settings-editor{scroll-margin-top:80px}
+}
+@media screen and (max-width:600px){
+    .inventory-filters{grid-template-columns:minmax(0,1fr)}
+    .inventory-filters .field:first-child{grid-column:auto}
+    .filter-actions>.button{flex:1}
+    .pos-search-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .pos-search-row>.field{grid-column:1/-1}
+    .pos-search-row>.button{width:100%;padding:8px}
+    .pos-product h2, .product-card h2{min-height:0}
+    .report-panel>header{align-items:flex-start;flex-wrap:wrap}
+    .profile-popover{max-width:calc(100vw - 32px)}
+    .toast{left:16px;right:16px;bottom:16px;padding:12px;gap:12px}
+}
+@media print{.sidebar-backdrop,.settings-mobile-category{display:none!important}}

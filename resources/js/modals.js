@@ -1,3 +1,4 @@
+import { clearValidation, showValidation, revealField } from './validation.js';
 const modal = document.querySelector('[data-workspace-modal]');
 if (modal) {
     const content = modal.querySelector('[data-workspace-content]');
@@ -119,11 +120,14 @@ if (modal) {
     async function save(form) {
         if (busy) return;
         let invalidField = null;
-        form.querySelectorAll('[aria-invalid]').forEach((control) => { control.removeAttribute('aria-invalid'); if (control.getAttribute('aria-describedby') === 'moto-modal-validation-summary') control.removeAttribute('aria-describedby'); });
+        clearValidation(form);
         const payload = new FormData(form);
         form.querySelectorAll('input[type=password]').forEach((input) => { input.value = ''; });
         const buttons = [...modal.querySelectorAll('button')];
         const previous = buttons.map((button) => button.disabled);
+        const submit = form.querySelector('[type="submit"]');
+        const submitLabel = submit?.innerHTML;
+        if (submit) submit.textContent = 'Saving…';
         buttons.forEach((button) => { button.disabled = true; });
         setBusy(true);
         const fields = [...form.elements].filter((control) => control.tagName !== 'BUTTON');
@@ -136,11 +140,7 @@ if (modal) {
             const isJson = response.headers.get('content-type')?.includes('application/json');
             const data = isJson ? await response.json() : null;
             if (!response.ok) {
-                for (const field of Object.keys(data?.errors || {})) {
-                    const parts = field.split('.'); const name = parts.shift() + parts.map((part) => '[' + part + ']').join('');
-                    const control = [...form.elements].find((element) => element.name === name);
-                    if (control) { control.setAttribute('aria-invalid', 'true'); control.setAttribute('aria-describedby', 'moto-modal-validation-summary'); invalidField ||= control; }
-                }
+                invalidField = showValidation(form, data?.errors, 'moto-modal-field');
                 const errors = Object.values(data?.errors || {}).flat();
                 throw new Error(errors.join(' ') || data?.message || 'The result could not be confirmed. Keep this form and check the saved record before retrying.');
             }
@@ -178,12 +178,13 @@ if (modal) {
             alert.id = 'moto-modal-validation-summary';
             form.prepend(alert);
             alert.scrollIntoView({ block: 'nearest' });
-            if (invalidField) { let details = invalidField.closest('details'); while (details) { details.open = true; details = details.parentElement.closest('details'); } invalidField.focus(); }
+
         } finally {
             setBusy(false);
+            if (submit?.isConnected) submit.innerHTML = submitLabel;
             buttons.forEach((button, index) => { if (button.isConnected) button.disabled = previous[index]; });
             fields.forEach((control, index) => { if (control.isConnected) control.disabled = disabledFields[index]; });
-            if (invalidField?.isConnected) invalidField.focus();
+            revealField(invalidField);
         }
     }
     document.addEventListener('click', (event) => {

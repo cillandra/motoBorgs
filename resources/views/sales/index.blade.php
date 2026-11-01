@@ -20,7 +20,7 @@
 <div class="field"><label for="method">Payment</label><div class="field-perimeter"><select name="method" id="method"><option value="">All methods</option>@foreach(['cash'=>'Cash','gcash'=>'GCash','qrph'=>'QR Ph','debit'=>'Debit card','credit'=>'Credit card'] as $value=>$label)<option value="{{ $value }}" @selected(($filters['method']??'')===$value)>{{ $label }}</option>@endforeach</select></div></div>
 <div class="field"><label for="status">Status</label><div class="field-perimeter"><select name="status" id="status"><option value="">All statuses</option>@foreach(['completed'=>'Completed','partial'=>'Partially refunded','refunded'=>'Refunded'] as $value=>$label)<option value="{{ $value }}" @selected(($filters['status']??'')===$value)>{{ $label }}</option>@endforeach</select></div></div>
 @if(auth()->user()->isManager() && isset($cashiers))<div class="field"><label for="cashier_id">Cashier</label><div class="field-perimeter"><select name="cashier_id" id="cashier_id"><option value="">All cashiers</option>@foreach($cashiers as $cashier)<option value="{{ $cashier->cashier_id }}" @selected(($filters['cashier_id']??'')==$cashier->cashier_id)>{{ $cashier->cashier_name }}</option>@endforeach</select></div></div>@endif
-<div class="action-row"><button class="button button-secondary">Apply</button><a class="button button-ghost" href="{{ route('sales.index') }}">Clear</a></div>
+<div class="action-row"><button type="submit" class="button button-secondary">Apply filters</button><a class="button button-ghost" href="{{ route('sales.index') }}">Clear filters</a></div>
 </form>
 @if($errors->any())<div class="inline-alert error" role="alert">{{ $errors->first() }}</div>@endif
 @if(isset($sales))
