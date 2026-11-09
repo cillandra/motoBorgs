@@ -1,0 +1,41 @@
+{
+  "transport": "Five independent loopback PHP HTTP servers sharing one MariaDB; real CSRF, database sessions and login; warmup excluded; no network adapter changes",
+  "page": {
+    "max_ms": 647.56,
+    "p50_ms": 564.98,
+    "samples": 300,
+    "p95_ms": 592.89
+  },
+  "recorded_at": "2026-10-27T23:04:51.7152692+08:00",
+  "machine": {
+    "ram_gb": 15.2,
+    "os": "Microsoft Windows 11 Home Single Language",
+    "cpu": "AMD Ryzen 7 6800H with Radeon Graphics         ",
+    "logical_processors": 16
+  },
+  "workers": 5,
+  "checkout_commit": {
+    "max_ms": 77.35,
+    "p50_ms": 66.83,
+    "samples": 100,
+    "p95_ms": 72.91
+  },
+  "search": {
+    "max_ms": 768.26,
+    "p50_ms": 591.19,
+    "samples": 200,
+    "p95_ms": 741.44
+  },
+  "dataset": {
+    "sales_before": 100000,
+    "variants": 10000,
+    "sales_created": 100
+  },
+  "distinct_sessions": 5,
+  "checkout_http": {
+    "max_ms": 510.6,
+    "p50_ms": 470.14,
+    "samples": 100,
+    "p95_ms": 495.07
+  }
+}

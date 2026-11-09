@@ -15,6 +15,19 @@ class SettingsService
 {
     public const DEFAULTS = [
         'general' => ['shop_name' => 'BORG’S Motorcycle Parts and Accessories', 'address' => '', 'contact' => '', 'currency' => 'PHP', 'timezone' => 'Asia/Manila'],
+        'storefront' => [
+            'display_name' => 'BORG’S Motorcycle Parts and Accessories',
+            'about' => 'Explore motorcycle parts and accessories, check our catalog, and ask the shop about the right fit for your motorcycle.',
+            'history' => 'BORG’S Motorcycle Parts and Accessories was established in 2021 to provide motorcycle owners with accessible and affordable motorcycle parts and accessories. The small business serves its customers through direct sales.',
+            'mission' => 'To provide affordable and quality motorcycle parts and accessories while maintaining good customer service and ensuring that products are properly monitored and available to customers.',
+            'vision' => 'To become a trusted and reliable motorcycle parts and accessories store that provides quality products and excellent service to motorcycle owners.',
+            'goals' => "To provide customers with quality motorcycle parts and accessories.\nTo maintain sufficient stocks of commonly purchased products.",
+            'profile_pending' => true,
+            'address' => 'Sample shop location · owner-confirmed address pending',
+            'hours' => 'Sample hours: Monday–Saturday, 8:00 AM–5:00 PM · to be confirmed',
+            'phone' => '', 'messenger_page' => '', 'demo_content' => true,
+            'services' => "Parts compatibility check | Sample service: ask about a part that fits your motorcycle.\nOil change assistance | Sample service: ask about suitable oil and service availability.\nBasic parts installation | Sample service: ask whether installation is offered for your chosen part.",
+        ],
         'sales' => ['methods' => ['cash', 'gcash', 'qrph', 'debit', 'credit'], 'discount_cap' => 10, 'manual_verification' => true],
         'receipts' => ['width' => 80, 'copies' => 1, 'footer' => 'Academic demonstration receipt', 'tax_enabled' => false, 'show_logo' => true],
         'inventory' => ['threshold' => 3, 'max_image_mb' => 5, 'allow_negative_stock' => false],
@@ -37,6 +50,12 @@ class SettingsService
     {
         $rules = match ($section) {
             'general' => ['shop_name' => ['required', 'string', 'min:2', 'max:160'], 'address' => ['nullable', 'string', 'max:500'], 'contact' => ['nullable', 'string', 'regex:/^[+()0-9 .-]{7,40}$/'], 'currency' => ['required', 'in:PHP'], 'timezone' => ['required', 'in:Asia/Manila']],
+            'storefront' => ['display_name' => ['required', 'string', 'max:160'], 'about' => ['required', 'string', 'max:1000'], 'history' => ['nullable', 'string', 'max:2000'], 'mission' => ['nullable', 'string', 'max:1000'], 'vision' => ['nullable', 'string', 'max:1000'], 'goals' => ['nullable', 'string', 'max:2000'], 'profile_pending' => ['required', 'boolean'], 'address' => ['required', 'string', 'max:1000'], 'hours' => ['required', 'string', 'max:1000'], 'phone' => ['nullable', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'], 'messenger_page' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z0-9.]{3,100}$/D'], 'demo_content' => ['required', 'boolean'], 'services' => ['nullable', 'string', 'max:4000', function (string $attribute, mixed $value, \Closure $fail): void {
+                $lines = array_values(array_filter(explode("\n", (string) $value), fn ($line) => trim($line) !== ''));
+                if (count($lines) > 20 || collect($lines)->contains(fn ($line) => mb_strlen(trim(explode('|', $line, 2)[0])) > 200)) {
+                    $fail('Use up to 20 services with names no longer than 200 characters.');
+                }
+            }]],
             'sales' => ['methods' => ['required', 'array', 'min:1', 'max:5'], 'methods.*' => ['required', 'distinct', 'in:cash,gcash,qrph,debit,credit'], 'discount_cap' => ['required', 'integer', 'between:0,10'], 'manual_verification' => ['accepted']],
             'receipts' => ['width' => ['required', 'integer', 'in:58,80'], 'copies' => ['required', 'integer', 'between:1,3'], 'footer' => ['nullable', 'string', 'max:200'], 'tax_enabled' => ['declined'], 'show_logo' => ['required', 'boolean']],
             'inventory' => ['threshold' => ['required', 'integer', 'between:0,1000000'], 'max_image_mb' => ['required', 'integer', 'between:1,5'], 'allow_negative_stock' => ['declined']],

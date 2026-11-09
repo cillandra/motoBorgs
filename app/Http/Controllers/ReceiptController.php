@@ -10,6 +10,16 @@ use Illuminate\Support\Facades\Gate;
 
 class ReceiptController extends Controller
 {
+    public function invoice(Request $request, Sale $sale): mixed
+    {
+        Gate::authorize('view', $sale);
+        $sale->load(['lines', 'payment']);
+        $shop = Setting::where('section', 'general')->first()?->value ?? [];
+        app(AuditRecorder::class)->record($request->user(), 'Invoice preview opened', 'sales', 'sale', (string) $sale->id, 'success');
+
+        return response()->view('sales.invoice', compact('sale', 'shop'))->header('Cache-Control', 'private, no-store');
+    }
+
     public function show(Request $request, Sale $sale): mixed
     {
         Gate::authorize('view', $sale);

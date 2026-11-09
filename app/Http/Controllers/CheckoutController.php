@@ -19,6 +19,7 @@ class CheckoutController extends Controller
         } catch (\InvalidArgumentException $error) {
             throw ValidationException::withMessages(['received' => $error->getMessage()]);
         }
+        $commitStart = hrtime(true);
         $result = $service->complete($request->user(), $cart, (int) $data['version'], $data['request_key'],
             ['method' => $data['method'], 'received_centavos' => $received, 'reference' => $data['reference'] ?? '', 'verified' => $request->boolean('verified')]);
         if (! $result->replayed) {
@@ -26,7 +27,7 @@ class CheckoutController extends Controller
         }
         $url = route('sales.receipt', $result->sale);
 
-        return $request->expectsJson() ? response()->json(['sale_id' => $result->sale->id, 'replayed' => $result->replayed, 'receipt_url' => $url], $result->replayed ? 200 : 201) : redirect($url);
+        return $request->expectsJson() ? response()->json(['sale_id' => $result->sale->id, 'replayed' => $result->replayed, 'receipt_url' => $url], $result->replayed ? 200 : 201)->header('Server-Timing', 'checkout;dur='.number_format((hrtime(true) - $commitStart) / 1000000, 3, '.', '')) : redirect($url);
     }
 
     public function status(Request $request, string $key, CheckoutService $service): mixed

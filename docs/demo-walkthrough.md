@@ -1,0 +1,20 @@
+# Demonstration walkthrough
+
+Start from `C:\xampp\htdocs\moto` with `scripts\start-demo.ps1`, then open `http://127.0.0.1:8000`. Keep the local server/database running. Use private `demo-access.txt` for fictional Manager/Staff credentials; never project or commit that file.
+
+1. Sign in as Manager, show all sidebar destinations and expand/collapse. Set Dashboard business date to **26 October 2026** for the existing rehearsal records. Later dates correctly show no activity until new transactions are recorded.
+2. In Inventory, switch cards/table, combine filters and clear them. Open product details in a modal. Add a clearly named academic product/variant with a unique SKU, or use samples. Missing photos are explicit; authorized JPG/PNG/WebP uploads work. Try a duplicate SKU to show inline validation, then correct/discard it.
+3. Receive one unit using a unique reference/reason. Reopen movement history and reconcile. Count changes require the displayed version. Completed sales remain immutable.
+4. Add a POS item, change quantity, hold, reload and resume the owned cart. Holding reserves no stock. Request a Manager discount with credentials/reason; the cashier identity stays unchanged. Editing/expiry invalidates approval.
+5. Complete a small **record-only** cash sale after counting cash. Confirm change, SKU deduction and original/copy receipt modal. For a noncash example, record the exact amount and a non-sensitive reference after hypothetical external verification; the app does not transfer money or contact a provider.
+6. If a response is interrupted, retain its attempt and use **Check status / Retry same attempt**. Never recollect payment due to a missing response/print. Independent-worker tests prove one last-stock winner and one deduction per successful sale.
+7. Find the sale, request a partial return, and review as Manager. Accept sellable/damaged quantities: only sellable stock returns. Record a refund as pending/failed/paid only after confirming its external outcome. Returned units and paid refund money are separate measures.
+8. Open all five report tabs with the same Manila date range. Reconcile gross minus discounts minus paid refunds. Historical SKU/category/cashier snapshots survive archive/access changes. Preview a report modal; save CSV/PDF when the native browser destination is available. CSV money columns are integer centavos.
+9. Inspect employees, roles and account actions in modals. Explain self/last-Manager guards and retained inactive history. Use a separate academic account for assisted recovery: the code is displayed once and the employee chooses a new passphrase. Do not alter someone else's credentials for a rehearsal.
+10. Filter Activity and open a detail modal. Open Notifications. Save/reload Light/compact preferences and restore the desired settings. Try an invalid shop contact; demonstrate Keep editing/Discard navigation.
+11. Create a real backup and inspect verified counts/compatibility in its modal. Copy it to a trusted separate drive. Restore **only on a separate disposable demonstration copy**: it replaces active records, creates a safety snapshot and ends sessions. Follow `backup-recovery.md`; never delete a pending journal to resume sales. Automatic backups remain visibly off until the Windows task and heartbeat are verified.
+12. Sign in as Staff: personal dashboard, owned carts/sales, read-only inventory and three personal Settings categories. Manager-only direct actions are denied. Sign out when finished.
+
+Existing 26 October totals: **₱710.00 recorded − ₱180.00 paid refund = ₱530.00 net**, 2 net units. Spark plug stock/ledger 19; brake pads 15. New rehearsals change real records; do not reset the database merely to reproduce screenshots.
+
+Before presentation, perform a user-controlled internet-disconnect rehearsal while leaving the local server running, then reconnect. This physical disconnect has not been performed by the agent. Physical printer/scanner, native CSV/PDF saving and second-device LAN also need local rehearsal. No production or legal-invoice compliance claim is made.

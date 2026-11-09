@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\StorefrontController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -18,7 +19,9 @@ Route::get('/health', function () {
     return response()->json(['app' => 'MOTO', 'database' => 'ok']);
 });
 
-Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'));
+Route::get('/', [StorefrontController::class, 'index'])->name('storefront.index');
+Route::post('/inquiries', [StorefrontController::class, 'submit'])->middleware('throttle:5,1')->name('storefront.inquiry');
+Route::get('/catalog/{product}/image', [StorefrontController::class, 'image'])->name('storefront.image');
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->name('login.store');

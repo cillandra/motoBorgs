@@ -9,7 +9,7 @@ use Symfony\Component\Process\Process;
 
 class DatabaseSnapshot
 {
-    public const TABLES = ['access_reset_tokens', 'approvals', 'audit_events', 'backup_manifests', 'cache', 'cache_locks', 'cart_lines', 'carts', 'catalog_locks', 'categories', 'failed_jobs', 'job_batches', 'jobs', 'migrations', 'notifications', 'password_reset_tokens', 'payment_records', 'preferences', 'products', 'refund_records', 'return_lines', 'return_requests', 'sale_lines', 'sales', 'sessions', 'settings', 'stock_movements', 'units', 'users', 'variants'];
+    public const TABLES = ['access_reset_tokens', 'approvals', 'audit_events', 'backup_manifests', 'cache', 'cache_locks', 'cart_lines', 'carts', 'catalog_locks', 'categories', 'customer_inquiries', 'failed_jobs', 'job_batches', 'jobs', 'migrations', 'notifications', 'password_reset_tokens', 'payment_records', 'preferences', 'products', 'refund_records', 'return_lines', 'return_requests', 'sale_lines', 'sales', 'sessions', 'settings', 'stock_movements', 'units', 'users', 'variants'];
 
     public const EPHEMERAL = ['sessions', 'cache', 'cache_locks', 'password_reset_tokens', 'access_reset_tokens', 'jobs', 'job_batches', 'failed_jobs', 'backup_manifests'];
 
@@ -112,6 +112,27 @@ class DatabaseSnapshot
         $bad = $stage->selectOne('SELECT COUNT(*) AS n FROM variants v LEFT JOIN (SELECT variant_id,SUM(delta) AS balance FROM stock_movements GROUP BY variant_id) m ON m.variant_id=v.id WHERE v.stock<>COALESCE(m.balance,0)');
         if ((int) $bad->n !== 0) {
             throw new RuntimeException('Restored stock does not reconcile with its ledger.');
+        }
+
+        $invalidSales = $stage->selectOne('SELECT COUNT(*) AS n FROM sales s LEFT JOIN (SELECT sale_id, SUM(price_centavos*quantity) AS gross, SUM(discount_centavos) AS discount, SUM(total_centavos) AS total FROM sale_lines GROUP BY sale_id) l ON l.sale_id=s.id LEFT JOIN payment_records p ON p.sale_id=s.id WHERE l.sale_id IS NULL OR p.id IS NULL OR s.subtotal_centavos<>l.gross OR s.discount_centavos<>l.discount OR s.total_centavos<>l.total OR s.total_centavos<>s.subtotal_centavos-s.discount_centavos OR s.tax_centavos<>0 OR p.amount_centavos<>s.total_centavos OR p.verified<>1 OR p.received_centavos<p.amount_centavos OR (p.method="cash" AND p.change_centavos<>p.received_centavos-p.amount_centavos) OR (p.method<>"cash" AND (p.received_centavos<>p.amount_centavos OR p.change_centavos<>0))');
+        $invalidLines = $stage->table('sale_lines')->whereRaw('quantity<1 OR discount_centavos>price_centavos*quantity OR total_centavos<>price_centavos*quantity-discount_centavos')->exists();
+        if ((int) $invalidSales->n !== 0 || $invalidLines) {
+            throw new RuntimeException('Restored sale totals do not reconcile with their lines and verified payment records.');
+        }
+        $foreignKeys = $stage->select('SELECT TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_SCHEMA,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=? AND REFERENCED_TABLE_NAME IS NOT NULL', [$candidate]);
+        foreach ($foreignKeys as $key) {
+            foreach ([$key->TABLE_NAME, $key->COLUMN_NAME, $key->REFERENCED_TABLE_NAME, $key->REFERENCED_COLUMN_NAME] as $identifier) {
+                if (! preg_match('/^[a-z_]+$/D', $identifier)) {
+                    throw new RuntimeException('Unexpected candidate relationship definition.');
+                }
+            }
+            if ($key->REFERENCED_TABLE_SCHEMA !== $candidate) {
+                throw new RuntimeException('Candidate relationship points outside its isolated database.');
+            }
+            $missing = $stage->selectOne('SELECT COUNT(*) AS n FROM `'.$key->TABLE_NAME.'` c LEFT JOIN `'.$key->REFERENCED_TABLE_NAME.'` p ON c.`'.$key->COLUMN_NAME.'`=p.`'.$key->REFERENCED_COLUMN_NAME.'` WHERE c.`'.$key->COLUMN_NAME.'` IS NOT NULL AND p.`'.$key->REFERENCED_COLUMN_NAME.'` IS NULL');
+            if ((int) $missing->n !== 0) {
+                throw new RuntimeException('Candidate records contain an incomplete relationship.');
+            }
         }
 
         return $stage;

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class SettingsController extends Controller
 {
-    public const LABELS = ['general' => 'General', 'sales' => 'Sales & payments', 'receipts' => 'Receipts & printing', 'inventory' => 'Inventory rules', 'notifications' => 'Notifications', 'security' => 'Security & access', 'backup' => 'Backup & recovery', 'system' => 'System & maintenance', 'preferences' => 'Preferences', 'account' => 'My account', 'about' => 'About MOTO'];
+    public const LABELS = ['general' => 'General', 'storefront' => 'Customer page', 'sales' => 'Sales & payments', 'receipts' => 'Receipts & printing', 'inventory' => 'Inventory rules', 'notifications' => 'Notifications', 'security' => 'Security & access', 'backup' => 'Backup & recovery', 'system' => 'System & maintenance', 'preferences' => 'Preferences', 'account' => 'My account', 'about' => 'About MOTO'];
 
     public function index(Request $request, SettingsService $settings, PreferenceService $preferences): mixed
     {

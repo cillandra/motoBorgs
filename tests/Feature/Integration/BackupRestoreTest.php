@@ -4,6 +4,7 @@ namespace Tests\Feature\Integration;
 
 use App\Models\AuditEvent;
 use App\Models\BackupManifest;
+use App\Models\CustomerInquiry;
 use App\Models\Sale;
 use App\Services\Inventory\StockLedger;
 use App\Services\Pos\CheckoutService;
@@ -151,7 +152,9 @@ class BackupRestoreTest extends TestCase
         $variant = $this->variant(3);
         Storage::disk('local')->put('products/original.png', 'original');
         $variant->product->update(['image_path' => 'products/original.png']);
+        $inquiry = CustomerInquiry::factory()->create(['variant_id' => $variant->id]);
         $backup = app(BackupService::class)->create($manager);
+        $inquiry->update(['message' => 'Changed after backup']);
         $cart = $this->cart($manager, [$variant->id => 1])->refresh();
         app(CheckoutService::class)->complete($manager, $cart, $cart->version, (string) Str::uuid(), ['method' => 'cash', 'received_centavos' => 10000]);
         Storage::disk('local')->put('products/original.png', 'changed');
@@ -164,6 +167,7 @@ class BackupRestoreTest extends TestCase
         $this->assertSame(3, $variant->fresh()->stock);
         $this->assertSame(3, (int) $variant->movements()->sum('delta'));
         $this->assertSame('original', Storage::disk('local')->get('products/original.png'));
+        $this->assertSame('Demonstration inquiry for a motorcycle part.', CustomerInquiry::findOrFail($inquiry->id)->message);
         $this->assertFalse(Storage::disk('local')->exists('products/later.png'));
         $this->assertSame(0, DB::table('sessions')->count());
         $this->assertSame(1, AuditEvent::where('type', 'Backup restored')->count());
@@ -301,5 +305,18 @@ class BackupRestoreTest extends TestCase
         $this->assertFileExists($this->workspace.'/operations/restore-journal.json');
         Storage::disk('local')->put('products/original.png', 'original');
         $this->assertStringContainsString('completed', app(RestoreService::class)->resume());
+    }
+
+    public function test_staged_restore_rejects_sale_totals_that_do_not_reconcile_with_lines_and_payment(): void
+    {
+        $manager = $this->manager();
+        $variant = $this->variant(3);
+        $cart = $this->cart($manager, [$variant->id => 1])->refresh();
+        $sale = app(CheckoutService::class)->complete($manager, $cart, $cart->version, (string) Str::uuid(), ['method' => 'cash', 'received_centavos' => 10000])->sale;
+        DB::table('sales')->where('id', $sale->id)->update(['total_centavos' => 9999]);
+        $backup = app(BackupService::class)->create($manager);
+        $this->failure(fn () => app(RestoreService::class)->restore($manager, $backup, 'Unit test passphrase 2026!', 'RESTORE'));
+        $this->assertFileDoesNotExist($this->workspace.'/operations/restore-journal.json');
+        $this->assertSame(9999, $sale->fresh()->total_centavos);
     }
 }

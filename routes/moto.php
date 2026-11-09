@@ -6,6 +6,7 @@ use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CustomerInquiryController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\NotificationController;
@@ -23,6 +24,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'active', 'session.lifetime'])->group(function (): void {
     Route::post('/checkout/{cart}', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/status/{key}', [CheckoutController::class, 'status'])->name('checkout.status');
+    Route::get('/customer-inquiries', [CustomerInquiryController::class, 'index'])->name('inquiries.index');
+    Route::put('/customer-inquiries/{inquiry}', [CustomerInquiryController::class, 'update'])->name('inquiries.update');
+    Route::get('/sales/{sale}/invoice', [ReceiptController::class, 'invoice'])->name('sales.invoice');
     Route::get('/sales/{sale}/receipt', [ReceiptController::class, 'show'])->name('sales.receipt');
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::get('/pos/lookup', [PosController::class, 'lookup'])->name('pos.lookup');
